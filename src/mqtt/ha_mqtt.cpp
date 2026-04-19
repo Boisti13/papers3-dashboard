@@ -274,6 +274,8 @@ void mqtt_publish_float(const char *topic, float value) {
     mqtt_publish(topic, buf);
 }
 
+bool mqtt_connected() { return mqtt_client.connected(); }
+
 void mqtt_publish_status(uint8_t battery_pct, int8_t rssi) {
     if (!mqtt_client.connected()) return;
     char buf[8];

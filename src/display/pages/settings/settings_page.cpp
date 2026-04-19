@@ -5,6 +5,7 @@
 #include "../../../power/sleep.h"
 #include "../../../ota/ota.h"
 
+#include <WiFi.h>
 #include <stdio.h>
 
 static lv_obj_t *s_page_settings   = nullptr;
@@ -12,6 +13,11 @@ static lv_obj_t *s_lbl_inact_val   = nullptr;
 static lv_obj_t *s_lbl_ls_val      = nullptr;
 static lv_obj_t *s_btn_ota         = nullptr;
 static lv_obj_t *s_lbl_ota_status  = nullptr;
+static lv_obj_t *s_lbl_wifi_status = nullptr;
+static lv_obj_t *s_lbl_wifi_ssid   = nullptr;
+static lv_obj_t *s_lbl_wifi_rssi   = nullptr;
+static lv_obj_t *s_lbl_wifi_ip     = nullptr;
+static lv_obj_t *s_lbl_mqtt_status = nullptr;
 
 // ── Label updaters ────────────────────────────────────────────────────────────
 static void update_inact_label() {
@@ -104,6 +110,11 @@ static void cb_ota(lv_event_t *e) {
     // Force immediate e-paper refresh so the button state is visible right away
     lv_refr_now(lv_disp_get_default());
     epd_driver_full_refresh();
+}
+
+static void cb_wifi_reconnect(lv_event_t *e) {
+    (void)e;
+    WiFi.reconnect();
 }
 
 // ── Stepper row helper ────────────────────────────────────────────────────────
@@ -213,8 +224,11 @@ void build_page_settings() {
 
     // ── Card 2: OTA Update ────────────────────────────────────────────────────
     // heading y=0, button y=48 h=70, status label y=130, card outer=200
+    // OTA card: heading → status label → button (button anchored to bottom with 8px gap)
+    // Physical button bottom = PAD + btn_y + btn_h; card_h = that + 8
     const int32_t ota_btn_h  = 70;
-    const int32_t ota_card_h = 200;
+    const int32_t ota_btn_y  = 72;   // content y; physical bottom = 16+72+70=158
+    const int32_t ota_card_h = 166;  // 158 + 8px gap
     const int32_t ota_card_y = sleep_card_h + GAP;
 
     lv_obj_t *card2 = lv_obj_create(s_page_settings);
@@ -230,11 +244,16 @@ void build_page_settings() {
         lv_label_set_text(h, "OTA Update");
         lv_obj_set_pos(h, 0, 0);
 
+        s_lbl_ota_status = lv_label_create(card2);
+        lv_obj_add_style(s_lbl_ota_status, &g_sty_lbl_md, 0);
+        lv_label_set_text(s_lbl_ota_status, "");
+        lv_obj_set_pos(s_lbl_ota_status, 0, 38);
+
         s_btn_ota = lv_btn_create(card2);
         lv_obj_remove_style_all(s_btn_ota);
         lv_obj_add_style(s_btn_ota, &g_sty_btn, 0);
         lv_obj_set_size(s_btn_ota, inner_w, ota_btn_h);
-        lv_obj_set_pos(s_btn_ota, 0, 48);
+        lv_obj_set_pos(s_btn_ota, 0, ota_btn_y);
         lv_obj_add_event_cb(s_btn_ota, cb_ota, LV_EVENT_CLICKED, nullptr);
         {
             lv_obj_t *l = lv_label_create(s_btn_ota);
@@ -242,15 +261,85 @@ void build_page_settings() {
             lv_label_set_text(l, "Activate OTA Update");
             lv_obj_center(l);
         }
+    }
 
-        s_lbl_ota_status = lv_label_create(card2);
-        lv_obj_add_style(s_lbl_ota_status, &g_sty_lbl_md, 0);
-        lv_label_set_text(s_lbl_ota_status, "");
-        lv_obj_set_pos(s_lbl_ota_status, 0, 48 + ota_btn_h + 12);
+    // ── Card 3: WiFi ──────────────────────────────────────────────────────────
+    const int32_t wifi_card_y = ota_card_y + ota_card_h + GAP;
+    const int32_t row_h       = 36;
+    const int32_t val_x       = 160;
+    // 5 rows + button: heading(44) + 5*row_h(180) + gap(8) + btn(60) + 8px bottom gap
+    // Physical btn bottom = PAD + 44 + 5*row_h + 8 + 60 = 16+44+180+8+60=308; card_h=316
+    const int32_t wifi_card_h = 316;
+
+    lv_obj_t *card3 = lv_obj_create(s_page_settings);
+    lv_obj_remove_style_all(card3);
+    lv_obj_add_style(card3, &g_sty_card, 0);
+    lv_obj_set_size(card3, card_w, wifi_card_h);
+    lv_obj_set_pos(card3, 0, wifi_card_y);
+    lv_obj_clear_flag(card3, LV_OBJ_FLAG_SCROLLABLE);
+
+    {
+        lv_obj_t *h = lv_label_create(card3);
+        lv_obj_add_style(h, &g_sty_lbl_lg, 0);
+        lv_label_set_text(h, "WiFi");
+        lv_obj_set_pos(h, 0, 0);
+
+        // Row helper — key label left, value label right
+        auto make_row = [&](int32_t y, const char *key, const char *val) -> lv_obj_t * {
+            lv_obj_t *k = lv_label_create(card3);
+            lv_obj_add_style(k, &g_sty_lbl_md, 0);
+            lv_label_set_text(k, key);
+            lv_obj_set_pos(k, 0, y);
+
+            lv_obj_t *v = lv_label_create(card3);
+            lv_obj_add_style(v, &g_sty_lbl_md, 0);
+            lv_label_set_text(v, val);
+            lv_obj_set_pos(v, val_x, y);
+            return v;
+        };
+
+        s_lbl_wifi_status = make_row(44,              "WiFi:",   "—");
+        s_lbl_wifi_ssid   = make_row(44 + row_h,     "SSID:",   "—");
+        s_lbl_wifi_rssi   = make_row(44 + row_h * 2, "Signal:", "—");
+        s_lbl_wifi_ip     = make_row(44 + row_h * 3, "IP:",     "—");
+        s_lbl_mqtt_status = make_row(44 + row_h * 4, "MQTT:",   "—");
+
+        lv_obj_t *btn = lv_btn_create(card3);
+        lv_obj_remove_style_all(btn);
+        lv_obj_add_style(btn, &g_sty_btn, 0);
+        lv_obj_set_size(btn, inner_w, 60);
+        lv_obj_set_pos(btn, 0, 44 + row_h * 5 + 8);
+        lv_obj_add_event_cb(btn, cb_wifi_reconnect, LV_EVENT_CLICKED, nullptr);
+        {
+            lv_obj_t *l = lv_label_create(btn);
+            lv_obj_add_style(l, &g_sty_lbl_lg, 0);
+            lv_label_set_text(l, "Reconnect");
+            lv_obj_center(l);
+        }
     }
 }
 
 lv_obj_t *get_page_settings() { return s_page_settings; }
+
+void settings_page_update_wifi(bool connected, const char *ssid, int8_t rssi, const char *ip, bool mqtt_ok) {
+    if (s_lbl_wifi_status) lv_label_set_text(s_lbl_wifi_status, connected ? "Connected" : "Not Connected");
+    if (s_lbl_wifi_ssid)   lv_label_set_text(s_lbl_wifi_ssid,   ssid && *ssid ? ssid : "—");
+    if (s_lbl_wifi_rssi) {
+        if (connected) {
+            const char *quality = rssi >= -55 ? "Excellent"
+                                : rssi >= -65 ? "Good"
+                                : rssi >= -75 ? "Weak"
+                                :               "Poor";
+            char buf[32];
+            snprintf(buf, sizeof(buf), "%d dBm (%s)", rssi, quality);
+            lv_label_set_text(s_lbl_wifi_rssi, buf);
+        } else {
+            lv_label_set_text(s_lbl_wifi_rssi, "—");
+        }
+    }
+    if (s_lbl_wifi_ip)     lv_label_set_text(s_lbl_wifi_ip,     connected && ip && *ip ? ip : "—");
+    if (s_lbl_mqtt_status) lv_label_set_text(s_lbl_mqtt_status, mqtt_ok ? "Connected" : "Not Connected");
+}
 
 bool settings_page_update_sensor(const char *topic, const char *value) {
     (void)topic; (void)value;

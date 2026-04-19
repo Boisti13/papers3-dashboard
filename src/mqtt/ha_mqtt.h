@@ -30,3 +30,6 @@ void mqtt_publish_float(const char *topic, float value);
  * Call from the periodic battery update in loop().
  */
 void mqtt_publish_status(uint8_t battery_pct, int8_t rssi);
+
+/** Returns true while the MQTT client is connected to the broker. */
+bool mqtt_connected();

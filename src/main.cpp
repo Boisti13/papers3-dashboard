@@ -27,6 +27,9 @@
 #include "power/sleep.h"
 #include "display/epd_driver.h"
 #include "display/ui.h"
+#include "display/nav.h"
+#include "display/pages/settings/settings_page.h"
+#include "display/pages/thinklab/thinklab_page.h"
 #include "touch/gt911.h"
 #include "mqtt/ha_mqtt.h"
 #include "time/rtc_sync.h"
@@ -95,7 +98,15 @@ void setup() {
     draw_boot_message("building UI…");
     ui_init();
 
-    ui_update_wifi(false, 0);  // shows off icon until loop() confirms connection
+    ui_update_wifi(false, 0);
+
+    sleep_set_pre_sleep_cb([]() {
+        lv_obj_t *s = get_page_settings();
+        lv_obj_t *t = get_page_thinklab();
+        bool on_settings = s && !lv_obj_has_flag(s, LV_OBJ_FLAG_HIDDEN);
+        bool on_thinklab = t && !lv_obj_has_flag(t, LV_OBJ_FLAG_HIDDEN);
+        if (on_settings || on_thinklab) navigate_home();
+    });
 
     lv_refr_now(lv_disp_get_default());
     epd_driver_full_refresh();
@@ -170,10 +181,13 @@ void loop() {
         uint8_t p = battery_percent();
         bool chg  = battery_charging();
         bool usb  = battery_usb_connected();
-        int8_t rssi = (int8_t)WiFi.RSSI();
+        bool connected = (WiFi.status() == WL_CONNECTED);
+        int8_t rssi    = (int8_t)WiFi.RSSI();
+        String ip      = connected ? WiFi.localIP().toString() : "";
         ui_update_battery(v, p, chg, usb);
-        ui_update_wifi(WiFi.status() == WL_CONNECTED, rssi);
-        last_wifi = (WiFi.status() == WL_CONNECTED);
+        ui_update_wifi(connected, rssi);
+        settings_page_update_wifi(connected, WIFI_SSID, rssi, ip.c_str(), mqtt_connected());
+        last_wifi = connected;
         mqtt_publish_status(p, rssi);
         Serial.printf("[bat] %.2fV  %u%%  %s  rssi=%d\n",
                       v, p, chg ? "CHG" : (usb ? "USB" : "BATT"), rssi);
