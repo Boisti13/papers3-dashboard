@@ -27,6 +27,7 @@
 #include "power/sleep.h"
 #include "display/epd_driver.h"
 #include "display/ui.h"
+#include "display/pages/settings/settings_page.h"
 #include "touch/gt911.h"
 #include "mqtt/ha_mqtt.h"
 #include "time/rtc_sync.h"
@@ -170,10 +171,13 @@ void loop() {
         uint8_t p = battery_percent();
         bool chg  = battery_charging();
         bool usb  = battery_usb_connected();
-        int8_t rssi = (int8_t)WiFi.RSSI();
+        bool connected = (WiFi.status() == WL_CONNECTED);
+        int8_t rssi    = (int8_t)WiFi.RSSI();
+        String ip      = connected ? WiFi.localIP().toString() : "";
         ui_update_battery(v, p, chg, usb);
-        ui_update_wifi(WiFi.status() == WL_CONNECTED, rssi);
-        last_wifi = (WiFi.status() == WL_CONNECTED);
+        ui_update_wifi(connected, rssi);
+        settings_page_update_wifi(connected, WIFI_SSID, rssi, ip.c_str());
+        last_wifi = connected;
         mqtt_publish_status(p, rssi);
         Serial.printf("[bat] %.2fV  %u%%  %s  rssi=%d\n",
                       v, p, chg ? "CHG" : (usb ? "USB" : "BATT"), rssi);
