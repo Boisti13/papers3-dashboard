@@ -37,21 +37,9 @@ static const char *TAG = "main";
 // ─── WiFi ─────────────────────────────────────────────────────────────────────
 static void wifi_connect() {
     WiFi.mode(WIFI_STA);
-    const uint32_t timeout_ms = 15000;
-    Serial.printf("[WiFi] connecting to %s", WIFI_SSID);
+    WiFi.setAutoReconnect(true);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    uint32_t start = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - start < timeout_ms) {
-        delay(250);
-        Serial.print('.');
-    }
-
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.printf("\n[WiFi] connected — IP %s\n",
-                      WiFi.localIP().toString().c_str());
-    } else {
-        Serial.println("\n[WiFi] timeout — continuing without network");
-    }
+    Serial.printf("[WiFi] connecting to %s (background)\n", WIFI_SSID);
 }
 
 // ─── Boot splash (drawn before UI is ready) ───────────────────────────────────
@@ -107,11 +95,7 @@ void setup() {
     draw_boot_message("building UI…");
     ui_init();
 
-    // ── 8. NTP sync (UI must exist before rtc_update_ui is called) ───────────
-    if (WiFi.status() == WL_CONNECTED) {
-        rtc_sync_ntp();
-        rtc_update_ui();
-    }
+    ui_update_wifi(false, 0);  // shows off icon until loop() confirms connection
 
     lv_refr_now(lv_disp_get_default());
     epd_driver_full_refresh();
@@ -150,6 +134,26 @@ void loop() {
 
     uint32_t now = millis();
 
+    // WiFi reconnect fallback — if auto-reconnect hasn't recovered after 30 s, force it
+    static uint32_t s_wifi_lost_ms = 0;
+    static bool s_ntp_synced = false;
+    if (WiFi.status() != WL_CONNECTED) {
+        if (s_wifi_lost_ms == 0) s_wifi_lost_ms = now;
+        if (now - s_wifi_lost_ms >= 30000) {
+            s_wifi_lost_ms = 0;
+            s_ntp_synced   = false;
+            WiFi.reconnect();
+            Serial.println("[WiFi] forced reconnect");
+        }
+    } else {
+        s_wifi_lost_ms = 0;
+        if (!s_ntp_synced) {
+            s_ntp_synced = true;
+            rtc_sync_ntp();
+            rtc_update_ui();
+        }
+    }
+
     // Date — update UI every 60 s (catches midnight rollover)
     static uint32_t last_date_ms = 0;
     if (now - last_date_ms >= 60000 || last_date_ms == 0) {
@@ -159,22 +163,25 @@ void loop() {
 
     // Battery + WiFi status — update UI every 30 s
     static uint32_t last_bat_ms  = 0;
-    static bool     last_wifi    = false;
+    static int      last_wifi    = -1;  // -1 forces first update
     if (now - last_bat_ms >= 30000 || last_bat_ms == 0) {
         last_bat_ms = now;
         float v   = battery_voltage();
         uint8_t p = battery_percent();
         bool chg  = battery_charging();
         bool usb  = battery_usb_connected();
+        int8_t rssi = (int8_t)WiFi.RSSI();
         ui_update_battery(v, p, chg, usb);
-        mqtt_publish_status(p, (int8_t)WiFi.RSSI());
+        ui_update_wifi(WiFi.status() == WL_CONNECTED, rssi);
+        last_wifi = (WiFi.status() == WL_CONNECTED);
+        mqtt_publish_status(p, rssi);
         Serial.printf("[bat] %.2fV  %u%%  %s  rssi=%d\n",
-                      v, p, chg ? "CHG" : (usb ? "USB" : "BATT"), WiFi.RSSI());
+                      v, p, chg ? "CHG" : (usb ? "USB" : "BATT"), rssi);
     }
     bool wifi_now = (WiFi.status() == WL_CONNECTED);
     if (wifi_now != last_wifi) {
         last_wifi = wifi_now;
-        ui_update_wifi(wifi_now);
+        ui_update_wifi(wifi_now, (int8_t)WiFi.RSSI());
     }
 
     // Yield to background tasks (WiFi stack, watchdog)

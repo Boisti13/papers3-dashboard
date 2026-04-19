@@ -10,8 +10,8 @@ void ui_update_date(const char *date_str);
 /** Update battery info in header. */
 void ui_update_battery(float volts, uint8_t pct, bool charging, bool usb);
 
-/** Dim or restore WiFi icon in header. */
-void ui_update_wifi(bool connected);
+/** Update WiFi icon in header — shows signal strength (1–4 bars) or off icon. */
+void ui_update_wifi(bool connected, int8_t rssi = 0);
 
 /**
  * Route an MQTT binary (ON/OFF) state update to the correct widget.

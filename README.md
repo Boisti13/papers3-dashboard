@@ -14,6 +14,8 @@ A touch-enabled home automation dashboard for the **M5Stack PaperS3** (SKU C139)
 - Browser-based OTA firmware updates (no cable needed)
 - Light sleep with touch wake — battery friendly
 - LVGL 8.3 UI allocated entirely in 8 MB PSRAM
+- Non-blocking boot — home screen appears immediately, WiFi connects in background
+- Live WiFi signal strength indicator (4-bar RSSI) in header
 
 ---
 
