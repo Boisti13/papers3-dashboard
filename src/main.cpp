@@ -37,21 +37,8 @@ static const char *TAG = "main";
 // ─── WiFi ─────────────────────────────────────────────────────────────────────
 static void wifi_connect() {
     WiFi.mode(WIFI_STA);
-    const uint32_t timeout_ms = 15000;
-    Serial.printf("[WiFi] connecting to %s", WIFI_SSID);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    uint32_t start = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - start < timeout_ms) {
-        delay(250);
-        Serial.print('.');
-    }
-
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.printf("\n[WiFi] connected — IP %s\n",
-                      WiFi.localIP().toString().c_str());
-    } else {
-        Serial.println("\n[WiFi] timeout — continuing without network");
-    }
+    Serial.printf("[WiFi] connecting to %s (background)\n", WIFI_SSID);
 }
 
 // ─── Boot splash (drawn before UI is ready) ───────────────────────────────────
@@ -107,13 +94,7 @@ void setup() {
     draw_boot_message("building UI…");
     ui_init();
 
-    // ── 8. NTP sync (UI must exist before rtc_update_ui is called) ───────────
-    if (WiFi.status() == WL_CONNECTED) {
-        rtc_sync_ntp();
-        rtc_update_ui();
-    }
-
-    ui_update_wifi(WiFi.status() == WL_CONNECTED, (int8_t)WiFi.RSSI());
+    ui_update_wifi(false, 0);  // shows off icon until loop() confirms connection
 
     lv_refr_now(lv_disp_get_default());
     epd_driver_full_refresh();
@@ -151,6 +132,14 @@ void loop() {
     ota_loop();
 
     uint32_t now = millis();
+
+    // NTP sync — once after WiFi first connects
+    static bool s_ntp_synced = false;
+    if (!s_ntp_synced && WiFi.status() == WL_CONNECTED) {
+        s_ntp_synced = true;
+        rtc_sync_ntp();
+        rtc_update_ui();
+    }
 
     // Date — update UI every 60 s (catches midnight rollover)
     static uint32_t last_date_ms = 0;
