@@ -37,6 +37,7 @@ static const char *TAG = "main";
 // ─── WiFi ─────────────────────────────────────────────────────────────────────
 static void wifi_connect() {
     WiFi.mode(WIFI_STA);
+    WiFi.setAutoReconnect(true);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     Serial.printf("[WiFi] connecting to %s (background)\n", WIFI_SSID);
 }
@@ -133,12 +134,24 @@ void loop() {
 
     uint32_t now = millis();
 
-    // NTP sync — once after WiFi first connects
+    // WiFi reconnect fallback — if auto-reconnect hasn't recovered after 30 s, force it
+    static uint32_t s_wifi_lost_ms = 0;
     static bool s_ntp_synced = false;
-    if (!s_ntp_synced && WiFi.status() == WL_CONNECTED) {
-        s_ntp_synced = true;
-        rtc_sync_ntp();
-        rtc_update_ui();
+    if (WiFi.status() != WL_CONNECTED) {
+        if (s_wifi_lost_ms == 0) s_wifi_lost_ms = now;
+        if (now - s_wifi_lost_ms >= 30000) {
+            s_wifi_lost_ms = 0;
+            s_ntp_synced   = false;
+            WiFi.reconnect();
+            Serial.println("[WiFi] forced reconnect");
+        }
+    } else {
+        s_wifi_lost_ms = 0;
+        if (!s_ntp_synced) {
+            s_ntp_synced = true;
+            rtc_sync_ntp();
+            rtc_update_ui();
+        }
     }
 
     // Date — update UI every 60 s (catches midnight rollover)
