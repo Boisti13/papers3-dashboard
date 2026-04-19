@@ -35,6 +35,7 @@
 static uint32_t  s_inactivity_ms      = 60000UL;   // 1 min default
 static uint32_t  s_lightsleep_ms      = 300000UL;  // 5 min default
 static bool      s_inhibit            = false;
+static void    (*s_pre_sleep_cb)()    = nullptr;
 static uint32_t  s_last_activity      = 0;
 static uint32_t  s_light_sleep_entry  = 0;
 static bool      s_pending_deep_sleep = false;
@@ -129,7 +130,7 @@ static void do_light_sleep() {
         s_light_sleep_entry = millis();
         Serial.println("[sleep] entering light sleep");
         Serial.flush();
-        // Show sleep indicator and bake it into the e-paper image before sleeping
+        if (s_pre_sleep_cb) s_pre_sleep_cb();
         ui_show_sleep_indicator(true);
         lv_refr_now(lv_disp_get_default());
         epd_driver_full_refresh();
@@ -221,6 +222,8 @@ uint32_t sleep_get_inactivity_ms() { return s_inactivity_ms; }
 uint32_t sleep_get_lightsleep_ms() { return s_lightsleep_ms; }
 
 void sleep_inhibit(bool inhibit) { s_inhibit = inhibit; }
+
+void sleep_set_pre_sleep_cb(void (*cb)(void)) { s_pre_sleep_cb = cb; }
 
 void sleep_tick() {
     // Stage 2: waiting to power off

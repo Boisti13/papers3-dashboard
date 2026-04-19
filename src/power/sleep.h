@@ -28,3 +28,8 @@ uint32_t sleep_get_lightsleep_ms();
 
 // ── Sleep inhibit (e.g. while OTA is active) ──────────────────────────────────
 void sleep_inhibit(bool inhibit);
+
+// ── Pre-sleep callback ────────────────────────────────────────────────────────
+// Called once just before the device enters light sleep. Use it to navigate
+// away from pages that shouldn't be visible on wake (e.g. Settings, ThinkLab).
+void sleep_set_pre_sleep_cb(void (*cb)(void));
