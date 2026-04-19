@@ -10,6 +10,7 @@
 #include "styles.h"
 #include "nav.h"
 #include "../config.h"
+#include "../fonts/icons.h"
 
 #include "pages/home/home_page.h"
 #include "pages/heating/heating_page.h"
@@ -64,8 +65,9 @@ static void build_header(lv_obj_t *scr) {
     lv_obj_align(s_lbl_page_name, LV_ALIGN_CENTER, 0, 0);
 
     s_lbl_wifi = lv_label_create(hdr);
-    lv_obj_add_style(s_lbl_wifi, &g_sty_lbl_sm, 0);
-    lv_label_set_text(s_lbl_wifi, LV_SYMBOL_WIFI);
+    lv_obj_set_style_text_font(s_lbl_wifi, &lv_font_mdi_20, 0);
+    lv_obj_set_style_text_color(s_lbl_wifi, lv_color_black(), 0);
+    lv_label_set_text(s_lbl_wifi, MDI_WIFI_OFF);
     lv_obj_align(s_lbl_wifi, LV_ALIGN_RIGHT_MID, -PAD, -12);
 
     s_lbl_battery = lv_label_create(hdr);
@@ -186,10 +188,21 @@ void ui_update_battery(float volts, uint8_t pct, bool charging, bool usb) {
     lv_label_set_text(s_lbl_battery, buf);
 }
 
-void ui_update_wifi(bool connected) {
-    if (s_lbl_wifi)
-        lv_obj_set_style_text_color(s_lbl_wifi,
-            connected ? lv_color_black() : lv_color_make(0xAA, 0xAA, 0xAA), 0);
+void ui_update_wifi(bool connected, int8_t rssi) {
+    if (!s_lbl_wifi) return;
+    const char *icon;
+    if (!connected) {
+        icon = MDI_WIFI_OFF;
+    } else if (rssi >= -55) {
+        icon = MDI_WIFI_4;
+    } else if (rssi >= -65) {
+        icon = MDI_WIFI_3;
+    } else if (rssi >= -75) {
+        icon = MDI_WIFI_2;
+    } else {
+        icon = MDI_WIFI_1;
+    }
+    lv_label_set_text(s_lbl_wifi, icon);
 }
 
 void ui_update_switch(const char *topic, bool on) {

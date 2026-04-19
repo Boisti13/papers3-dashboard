@@ -113,6 +113,8 @@ void setup() {
         rtc_update_ui();
     }
 
+    ui_update_wifi(WiFi.status() == WL_CONNECTED, (int8_t)WiFi.RSSI());
+
     lv_refr_now(lv_disp_get_default());
     epd_driver_full_refresh();
 
@@ -159,22 +161,25 @@ void loop() {
 
     // Battery + WiFi status — update UI every 30 s
     static uint32_t last_bat_ms  = 0;
-    static bool     last_wifi    = false;
+    static int      last_wifi    = -1;  // -1 forces first update
     if (now - last_bat_ms >= 30000 || last_bat_ms == 0) {
         last_bat_ms = now;
         float v   = battery_voltage();
         uint8_t p = battery_percent();
         bool chg  = battery_charging();
         bool usb  = battery_usb_connected();
+        int8_t rssi = (int8_t)WiFi.RSSI();
         ui_update_battery(v, p, chg, usb);
-        mqtt_publish_status(p, (int8_t)WiFi.RSSI());
+        ui_update_wifi(WiFi.status() == WL_CONNECTED, rssi);
+        last_wifi = (WiFi.status() == WL_CONNECTED);
+        mqtt_publish_status(p, rssi);
         Serial.printf("[bat] %.2fV  %u%%  %s  rssi=%d\n",
-                      v, p, chg ? "CHG" : (usb ? "USB" : "BATT"), WiFi.RSSI());
+                      v, p, chg ? "CHG" : (usb ? "USB" : "BATT"), rssi);
     }
     bool wifi_now = (WiFi.status() == WL_CONNECTED);
     if (wifi_now != last_wifi) {
         last_wifi = wifi_now;
-        ui_update_wifi(wifi_now);
+        ui_update_wifi(wifi_now, (int8_t)WiFi.RSSI());
     }
 
     // Yield to background tasks (WiFi stack, watchdog)

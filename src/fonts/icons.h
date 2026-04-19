@@ -7,7 +7,7 @@
  * Font file : src/fonts/lv_font_mdi_48.c
  * Symbol    : lv_font_mdi_48  (48 px, bpp 4)
  *
- * To regenerate:
+ * To regenerate lv_font_mdi_48:
  *   1. Download TTF:
  *      https://github.com/Templarian/MaterialDesign-Webfont/raw/master/fonts/materialdesignicons-webfont.ttf
  *   2. Open https://lvgl.io/tools/fontconverter
@@ -23,6 +23,12 @@
  *              src/fonts/materialdesignicons-webfont.c
  *   5. Also remove the line ".static_bitmap = 0," if it appears near the end.
  *
+ * To regenerate lv_font_mdi_20 (WiFi header icons):
+ *   Same steps but:
+ *      Name: lv_font_mdi_20  |  Size: 20  |  Bpp: 4
+ *      Range: 985375,985378,985381,985384,985390
+ *   Save as: src/fonts/lv_font_mdi_20.c
+ *
  * lv_conf.h must contain:
  *   #define LV_FONT_CUSTOM_DECLARE  LV_FONT_DECLARE(lv_font_mdi_48)
  *
@@ -32,6 +38,7 @@
  */
 
 LV_FONT_DECLARE(lv_font_mdi_48);
+LV_FONT_DECLARE(lv_font_mdi_20);
 
 // ── UTF-8 encoding note ───────────────────────────────────────────────────────
 // All MDI codepoints are in the supplementary PUA (U+F0000–U+FFFFF, plane 15).
@@ -77,6 +84,13 @@ LV_FONT_DECLARE(lv_font_mdi_48);
 #define MDI_NVIDIA             "\xf3\xb0\x98\x9a"  // U+F061A  mdi:chip  (nvidia removed from MDI)
 #define MDI_LIGHTBULB          "\xf3\xb0\x8c\xb5"  // U+F0335  mdi:lightbulb
 #define MDI_HEAT_WAVE          "\xf3\xb1\xa9\x85"  // U+F1A45  mdi:heat-wave
+
+// ── WiFi signal (lv_font_mdi_20) ─────────────────────────────────────────────
+#define MDI_WIFI_1             "\xf3\xb0\xa4\x9f"  // U+F091F  mdi:wifi-strength-1
+#define MDI_WIFI_2             "\xf3\xb0\xa4\xa2"  // U+F0922  mdi:wifi-strength-2
+#define MDI_WIFI_3             "\xf3\xb0\xa4\xa5"  // U+F0925  mdi:wifi-strength-3
+#define MDI_WIFI_4             "\xf3\xb0\xa4\xa8"  // U+F0928  mdi:wifi-strength-4
+#define MDI_WIFI_OFF           "\xf3\xb0\xa4\xae"  // U+F092E  mdi:wifi-strength-off-outline
 
 // ── ThinkLab ──────────────────────────────────────────────────────────────────
 #define MDI_CPU_64_BIT         "\xf3\xb0\xbb\xa0"  // U+F0EE0  mdi:cpu-64-bit

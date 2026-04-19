@@ -74,7 +74,8 @@
 #define LV_FONT_DEFAULT &lv_font_montserrat_14
 
 /* Custom MDI icon font (lv_font_mdi_48.c) */
-#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(lv_font_mdi_48)
+#define LV_FONT_CUSTOM_DECLARE  LV_FONT_DECLARE(lv_font_mdi_48) \
+                                LV_FONT_DECLARE(lv_font_mdi_20)
 
 /* Misc */
 #define LV_USE_PERF_MONITOR 0
