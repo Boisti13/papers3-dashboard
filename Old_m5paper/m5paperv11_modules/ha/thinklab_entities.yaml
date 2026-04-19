@@ -1,0 +1,119 @@
+# ha/thinklab_entities.yaml
+
+substitutions:
+  THINKLAB_TV_POWER_ENTITY: "sensor.tv_thinklab_power"
+  THINKLAB_CPU_USAGE_ENTITY: "sensor.thinklab_cpu_usage"
+
+  THINKLAB_DRIVE_256SSD_ENTITY: "sensor.thinklab_mount_mntssd256gb25"
+  THINKLAB_DRIVE_500HDD_ENTITY: "sensor.thinklab_mount_mntdisk500gb25"
+  THINKLAB_DRIVE_5TBHDD_ENTITY: "sensor.thinklab_mount_mntdisk5tb25"
+  THINKLAB_DRIVE_2TBHDD_ENTITY: "sensor.thinklab_mount_mntdisk2tb35"
+  THINKLAB_DRIVE_8TBHDD_ENTITY: "sensor.thinklab_mount_mntdisk8tb35"
+
+  THINKLAB_LXC_AUDIOBOOKSHELF_ENTITY: "switch.lxc_audiobookshelf_102"
+  THINKLAB_LXC_JELLYFIN_ENTITY: "switch.lxc_jellyfin_101"
+  THINKLAB_LXC_PIHOLE_ENTITY: "switch.lxc_pihole_103"
+  THINKLAB_LXC_SMB_ENTITY: "switch.lxc_smb_share_106"
+  THINKLAB_LXC_ZEROTIER_ENTITY: "switch.lxc_zerotier_one_105"
+  THINKLAB_LXC_SPROUT_ENTITY: "switch.lxc_sprout_track_108"
+  THINKLAB_VM_HAOS_ENTITY: "switch.vm_haos16_1_100"
+
+sensor:
+  - platform: homeassistant
+    id: s_tv_thinklab_power
+    entity_id: ${THINKLAB_TV_POWER_ENTITY}
+    on_value:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: s_thinklab_cpu_usage
+    entity_id: ${THINKLAB_CPU_USAGE_ENTITY}
+    on_value:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: s_thinklab_mount_mntssd256gb25
+    entity_id: ${THINKLAB_DRIVE_256SSD_ENTITY}
+    on_value:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: s_thinklab_mount_mntdisk500gb25
+    entity_id: ${THINKLAB_DRIVE_500HDD_ENTITY}
+    on_value:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: s_thinklab_mount_mntdisk5tb25
+    entity_id: ${THINKLAB_DRIVE_5TBHDD_ENTITY}
+    on_value:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: s_thinklab_mount_mntdisk2tb35
+    entity_id: ${THINKLAB_DRIVE_2TBHDD_ENTITY}
+    on_value:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: s_thinklab_mount_mntdisk8tb35
+    entity_id: ${THINKLAB_DRIVE_8TBHDD_ENTITY}
+    on_value:
+      then:
+        - script.execute: thinklab_refresh
+
+switch:
+  - platform: homeassistant
+    id: sw_lxc_audiobookshelf_102
+    entity_id: ${THINKLAB_LXC_AUDIOBOOKSHELF_ENTITY}
+    on_state:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: sw_lxc_jellyfin_101
+    entity_id: ${THINKLAB_LXC_JELLYFIN_ENTITY}
+    on_state:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: sw_lxc_pihole_103
+    entity_id: ${THINKLAB_LXC_PIHOLE_ENTITY}
+    on_state:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: sw_lxc_smb_share_106
+    entity_id: ${THINKLAB_LXC_SMB_ENTITY}
+    on_state:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: sw_lxc_zerotier_one_105
+    entity_id: ${THINKLAB_LXC_ZEROTIER_ENTITY}
+    on_state:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: sw_lxc_sprout_track_108
+    entity_id: ${THINKLAB_LXC_SPROUT_ENTITY}
+    on_state:
+      then:
+        - script.execute: thinklab_refresh
+
+  - platform: homeassistant
+    id: sw_vm_haos16_1_100
+    entity_id: ${THINKLAB_VM_HAOS_ENTITY}
+    on_state:
+      then:
+        - script.execute: thinklab_refresh

@@ -1,0 +1,78 @@
+lvgl:
+  pages:
+    - id: page_climate
+      scrollable: false
+      scrollbar_mode: "OFF"
+      on_load:
+        - script.execute: page_climate_prepare
+      widgets:
+        - obj:
+            id: climate_bg
+            x: 0
+            y: 60
+            width: 540
+            height: 812
+            styles: st_page_content
+            scrollable: false
+            scrollbar_mode: "OFF"
+            widgets:
+              - obj:
+                  id: climate_card_main
+                  x: 20
+                  y: 20
+                  width: 480
+                  height: 170
+                  styles: st_card
+                  scrollable: false
+                  clickable: false
+                  shadow_width: 0
+                  outline_width: 0
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        styles: st_body_text
+                        text: "Climate"
+
+                    - label:
+                        x: 0
+                        y: 44
+                        width: 440
+                        styles: st_body_text_muted
+                        text: "Replace this shell with temperature, humidity, and outdoor metrics."
+
+              - obj:
+                  id: climate_card_secondary
+                  x: 20
+                  y: 210
+                  width: 480
+                  height: 170
+                  styles: st_card
+                  scrollable: false
+                  clickable: false
+                  shadow_width: 0
+                  outline_width: 0
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        styles: st_body_text
+                        text: "Details"
+
+                    - label:
+                        x: 0
+                        y: 44
+                        width: 440
+                        styles: st_body_text_muted
+                        text: "Use this area for forecasts or room summaries."
+
+script:
+  - id: page_climate_prepare
+    mode: restart
+    then:
+      - lambda: |-
+          id(ui_title) = "Climate";
+          id(ui_parent_page) = 0;
+          id(ui_left_enabled) = true;
+          id(ui_right_enabled) = true;
+      - script.execute: ui_apply_chrome

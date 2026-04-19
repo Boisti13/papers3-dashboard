@@ -1,0 +1,150 @@
+# =====================================================
+# HA_ESP32_TOUCH — Home Assistant entity substitutions
+# Single source of truth for entity_ids used in pages
+# =====================================================
+
+substitutions:
+
+  # -------------------------
+  # Room 1 — Bathroom
+  # -------------------------
+  ROOM_1_NAME: "Bathroom"
+  ROOM_1_TRV: climate.bathroom_radiator
+  ROOM_1_WINDOW: binary_sensor.bathroom_window_contact
+  ROOM_1_TEMP: sensor.bathroom_temperature
+  ROOM_1_HUM: sensor.bathroom_humidity
+  ROOM_1_VALVE: sensor.bathroom_trv_position
+  ROOM_1_BOOST: script.heating_boost_bathroom   # placeholder ok
+
+  # -------------------------
+  # Room 2 — Kitchen
+  # -------------------------
+  ROOM_2_NAME: "Kitchen"
+  ROOM_2_TRV: climate.kitchen_radiator
+  ROOM_2_WINDOW: binary_sensor.kitchen_window_contact
+  ROOM_2_TEMP: sensor.kitchen_temperature
+  ROOM_2_HUM: sensor.kitchen_humidity
+  ROOM_2_VALVE: sensor.kitchen_trv_position
+  ROOM_2_BOOST: script.heating_boost_kitchen    # placeholder ok
+
+  # -------------------------
+  # Room 3 — Bedroom
+  # -------------------------
+  ROOM_3_NAME: "Bedroom"
+  ROOM_3_TRV: climate.bedroom_radiator
+  ROOM_3_WINDOW: binary_sensor.bedroom_window_contact
+  ROOM_3_TEMP: sensor.bedroom_temperature
+  ROOM_3_HUM: sensor.bedroom_humidity
+  ROOM_3_VALVE: sensor.bedroom_trv_position
+  ROOM_3_BOOST: script.heating_boost_bedroom    # placeholder ok
+
+  # -------------------------
+  # Room 4 — Living Room
+  # -------------------------
+  ROOM_4_NAME: "Living Room"
+  ROOM_4_TRV: climate.living_room_radiator
+  ROOM_4_WINDOW: binary_sensor.living_room_window_contact
+  ROOM_4_TEMP: sensor.living_room_temperature
+  ROOM_4_HUM: sensor.living_room_humidity
+  ROOM_4_VALVE: sensor.living_room_trv_position
+  ROOM_4_BOOST: script.heating_boost_living_room  # placeholder ok
+
+  # -------------------------
+  # Room 5 — Hallway (no entities yet)
+  # -------------------------
+  ROOM_5_NAME: "Hallway"
+  ROOM_5_TRV: ""        # no TRV yet
+  ROOM_5_WINDOW: ""     # no contact yet
+  ROOM_5_TEMP: ""       # no sensor yet
+  ROOM_5_HUM: ""        # no sensor yet
+  ROOM_5_VALVE: ""      # no valve sensor
+  ROOM_5_BOOST: ""      # no boost script
+
+  # -------------------------
+  # Room 6 — Arthur
+  # -------------------------
+  ROOM_6_NAME: "Arthur"
+  ROOM_6_TRV: climate.arthur_radiator
+  ROOM_6_WINDOW: binary_sensor.arthur_window_contact
+  ROOM_6_TEMP: sensor.childs_room_temperature
+  ROOM_6_HUM: sensor.childs_room_humidity
+  ROOM_6_VALVE: sensor.arthur_trv_position
+  ROOM_6_BOOST: script.heating_boost_arthur     # placeholder ok
+
+  # -------------------------
+  # Outdoor
+  # -------------------------
+  OUTDOOR_TEMP: sensor.outdoor_2_temperature
+  OUTDOOR_HUM: sensor.outdoor_2_humidity
+
+  # -------------------------
+  # Cleaning / Vacuum
+  # -------------------------
+  VACUUM_ENTITY: vacuum.roborock_s6_maxv
+
+  VAC_ROOM_BATHROOM: input_boolean.vac_room_bad
+  VAC_ROOM_HALLWAY: input_boolean.vac_room_flur
+  VAC_ROOM_BEDROOM: input_boolean.vac_room_schlafzimmer
+  VAC_ROOM_LIVING: input_boolean.vac_room_wohnzimmer
+  VAC_ROOM_KIDS: input_boolean.vac_room_kinderzimmer
+  VAC_ROOM_KITCHEN: input_boolean.vac_room_kuche
+
+  VAC_REPEAT_SELECT: input_select.vacuum_repeat
+
+  VAC_SCRIPT_SELECTED_ROOMS: script.vacuum_clean_selected_rooms
+  VAC_SCRIPT_TRASHCAN: script.roborock_go_to_trashcan
+
+  # =========================
+  # climate entities
+  # =========================
+  ENT_climate_HOME: climate.home              # adjust to your HA climate entity
+  ENT_OUTDOOR_TEMP: sensor.outdoor_2_temperature
+  ENT_OUTDOOR_HUM: sensor.outdoor_2_humidity
+
+  # Indoor / room climate sensors (Climate page)
+  ENT_TEMP_LIVING: sensor.living_room_temperature
+  ENT_TEMP_BEDROOM: sensor.indoor_temperature
+  ENT_TEMP_HALLWAY: sensor.hallway_temperature
+  ENT_TEMP_KITCHEN: sensor.kitchen_temperature
+  ENT_TEMP_OUTDOOR: sensor.indoor_aussenmodul_temperature
+  ENT_TEMP_KIDS: sensor.childs_room_temperature
+  ENT_TEMP_BATHROOM: sensor.bathroom_temperature
+  ENT_TEMP_CHEDDAR: sensor.cheddar_temp_temperature
+
+  ENT_HUM_OUTDOOR: sensor.indoor_aussenmodul_humidity
+  ENT_HUM_LIVING: sensor.living_room_humidity
+  ENT_HUM_BEDROOM: sensor.bedroom_humidity
+  ENT_HUM_HALLWAY: sensor.hallway_humidity
+  ENT_HUM_KITCHEN: sensor.kitchen_humidity
+  ENT_HUM_KIDS: sensor.childs_room_humidity
+  ENT_HUM_BATHROOM: sensor.bathroom_humidity
+
+  ENT_CO2_INDOOR: sensor.indoor_carbon_dioxide
+  ENT_NOISE_INDOOR: sensor.indoor_noise
+  ENT_AIR_PM25: sensor.airquality_1_pm25
+  ENT_AIR_VOC_INDEX: sensor.airquality_1_voc_index
+
+  # =========================
+  # Versatile Thermostat — Central mode
+  # =========================
+  ENT_VT_CENTRAL_MODE: select.central_mode
+
+  # =========================
+  # Switches / Lights / Remotes
+  # =========================
+  ENT_SW_TV_SOCKET: switch.tv_thinklab_l2
+  ENT_LIGHT_LIVING_LED: light.living_led
+  ENT_REMOTE_SHIELD: remote.shield
+  ENT_REMOTE_TV: remote.samsung_7_series_50
+  ENT_LIGHT_KITCHEN_MAIN: light.kitchen_main_led
+  ENT_SW_ARTHUR_SOCKET: switch.arthur_socket
+
+  # -------------------------
+  # Arthur — Sprout Track
+  # -------------------------
+  ARTHUR_SPROUT_SINCE_FEED: sensor.sprout_track_arthur_arthur_time_since_feed_hh_mm
+  ARTHUR_SPROUT_SINCE_DIAPER: sensor.sprout_track_arthur_arthur_time_since_diaper_hh_mm
+  ARTHUR_SPROUT_FEEDS_TODAY: sensor.sprout_track_arthur_arthur_feeds_today
+  ARTHUR_SPROUT_DIAPERS_TODAY: sensor.sprout_track_arthur_arthur_diapers_today
+  ARTHUR_SPROUT_LAST_FEED_SIDE: sensor.sprout_track_arthur_arthur_last_feed_side
+  ARTHUR_SPROUT_NEXT_FEED_SIDE: sensor.sprout_track_arthur_arthur_next_feed_side

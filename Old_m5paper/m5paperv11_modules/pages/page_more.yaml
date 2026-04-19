@@ -1,0 +1,102 @@
+lvgl:
+  pages:
+    - id: page_more
+      scrollable: false
+      scrollbar_mode: "OFF"
+      on_load:
+        then:
+          - script.execute: page_more_prepare
+
+      widgets:
+        - obj:
+            id: more_bg
+            x: 0
+            y: 60
+            width: 540
+            height: 812
+            styles:
+              - st_page_content
+            scrollable: false
+            scrollbar_mode: "OFF"
+
+            widgets:
+              - label:
+                  id: more_timeout_label
+                  x: 20
+                  y: 24
+                  styles:
+                    - st_body_text
+                  text: "Awake time"
+
+              - label:
+                  id: more_timeout_value
+                  x: 420
+                  y: 24
+                  styles:
+                    - st_body_text
+                  text: "--s"
+
+              - button:
+                  id: more_timeout_minus
+                  x: 60
+                  y: 100
+                  width: 100
+                  height: 60
+                  styles:
+                    - st_small_btn
+                  shadow_width: 0
+                  outline_width: 0
+                  pressed:
+                    bg_color: 0xBBBBBB
+                    bg_opa: COVER
+                    outline_width: 0
+                  on_click:
+                    then:
+                      - script.execute: more_timeout_dec
+                  widgets:
+                    - label:
+                        align: CENTER
+                        styles:
+                          - st_body_text
+                        text: "-"
+
+              - button:
+                  id: more_timeout_plus
+                  x: 340
+                  y: 100
+                  width: 100
+                  height: 60
+                  styles:
+                    - st_small_btn
+                  shadow_width: 0
+                  outline_width: 0
+                  pressed:
+                    bg_color: 0xBBBBBB
+                    bg_opa: COVER
+                    outline_width: 0
+                  on_click:
+                    then:
+                      - script.execute: more_timeout_inc
+                  widgets:
+                    - label:
+                        align: CENTER
+                        styles:
+                          - st_body_text
+                        text: "+"
+
+script:
+  - id: page_more_prepare
+    mode: restart
+    then:
+      - lambda: |-
+          id(ui_title) = "More";
+          id(ui_parent_page) = 0;
+          id(ui_left_enabled) = true;
+          id(ui_right_enabled) = true;
+      - script.execute: ui_apply_chrome
+      - lvgl.label.update:
+          id: more_timeout_value
+          text:
+            format: "%ds"
+            args:
+              - '(int) id(sleep_time).state'

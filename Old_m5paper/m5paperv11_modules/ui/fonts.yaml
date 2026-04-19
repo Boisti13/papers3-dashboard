@@ -1,0 +1,114 @@
+# m5paperv11_modules/ui/fonts.yaml
+# Native ESPHome bitmap fonts for use with it.print() in the display lambda.
+# All Ubuntu sizes share the same glyph set (ASCII + degree/special chars).
+# All MDI sizes share the same icon glyph set.
+
+font:
+  # -------------------------------------------------------
+  # Ubuntu Regular — text fonts
+  # -------------------------------------------------------
+  - file: "fonts/Ubuntu-Regular.ttf"
+    id: font_ubuntu_xs
+    size: 18
+    glyphs: &ubuntu_glyphs
+      - " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°"
+
+  - file: "fonts/Ubuntu-Regular.ttf"
+    id: font_ubuntu_s
+    size: 20
+    glyphs: *ubuntu_glyphs
+
+  - file: "fonts/Ubuntu-Regular.ttf"
+    id: font_ubuntu_m
+    size: 22
+    glyphs: *ubuntu_glyphs
+
+  - file: "fonts/Ubuntu-Regular.ttf"
+    id: font_ubuntu_l
+    size: 26
+    glyphs: *ubuntu_glyphs
+
+  - file: "fonts/Ubuntu-Regular.ttf"
+    id: font_ubuntu_xl
+    size: 36
+    glyphs: *ubuntu_glyphs
+
+  - file: "fonts/Ubuntu-Regular.ttf"
+    id: font_ubuntu_xxl
+    size: 80
+    glyphs: *ubuntu_glyphs
+
+  # -------------------------------------------------------
+  # Material Design Icons — icon fonts
+  # -------------------------------------------------------
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_xs
+    size: 45
+    glyphs: &mdi_glyphs
+      - "\U000F0141"  # mdi:chevron-left
+      - "\U000F0142"  # mdi:chevron-right
+      - "\U000F0140"  # mdi:chevron-down
+      - "\U000F02DC"  # mdi:home
+      - "\U000F01D8"  # mdi:dots-horizontal (more/menu)
+
+      # Sensor / climate icons
+      - "\U000F0F55"  # mdi:thermometer
+      - "\U000F058E"  # mdi:water-percent
+      - "\U000F05AE"  # mdi:window-open
+      - "\U000F0438"  # mdi:fire  (heating active)
+      - "\U000F0AD8"  # mdi:radiator (idle)
+
+      # Heating presets
+      - "\U000F1A71"  # frost
+      - "\U000F032A"  # eco (leaf)
+      - "\U000F04B9"  # comfort (sofa)
+      - "\U000F14DE"  # boost (lightning)
+      - "\U000F1A45"  # heat icon (hvac mode)
+
+      # Room icons
+      - "\U000F181C"  # kitchen
+      - "\U000F0E7D"  # child/arthur
+      - "\U000F19A2"  # cleaning / robot-vacuum
+      - "\U000F0FD1"  # bedroom (bed)
+      - "\U000F156D"  # living room
+      - "\U000F18D6"  # weather
+      - "\U000F0DFA"  # hallway (door)
+      - "\U000F1819"  # bathroom (shower)
+
+      # Vacuum controls
+      - "\U000F040A"  # mdi:play
+      - "\U000F03E4"  # mdi:pause
+      - "\U000F0F9C"  # mdi:home-import-outline (dock)
+      - "\U000F0A79"  # mdi:trash-can-outline
+
+      # Repeat / numeric circles
+      - "\U000F0CA0"  # mdi:numeric-1-circle
+      - "\U000F0CA2"  # mdi:numeric-2-circle
+
+      # WiFi
+      - "\U000F05A9"  # mdi:wifi
+      - "\U000F092B"  # mdi:wifi-off
+
+      # ThinkLab / Proxmox
+      - "\U000F05DA"  # mdi:book-open-page-variant (audiobookshelf)
+      - "\U000F0230"  # mdi:filmstrip            (jellyfin)
+      - "\U000F0CC8"  # mdi:shield-check         (pihole)
+      - "\U000F0870"  # mdi:folder-network       (smb)
+      - "\U000F11F1"  # mdi:cloud-lock           (zerotier)
+      - "\U000F006C"  # mdi:baby                 (sprout)
+      - "\U000F07D0"  # mdi:home-assistant       (haos)
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_s
+    size: 33
+    glyphs: *mdi_glyphs
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_l
+    size: 42
+    glyphs: *mdi_glyphs
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_xl
+    size: 54
+    glyphs: *mdi_glyphs

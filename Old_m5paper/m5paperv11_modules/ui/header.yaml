@@ -1,0 +1,111 @@
+binary_sensor:
+  - platform: status
+    id: ui_wifi_connected
+    on_state:
+      then:
+        - lambda: |-
+            id(ui_wifi_ok) = id(ui_wifi_connected).state;
+        - script.execute: ui_update_wifi
+
+interval:
+  - interval: 60s
+    then:
+      - script.execute: ui_update_time
+
+script:
+  - id: ui_update_time
+    mode: restart
+    then:
+      - lambda: |-
+          auto now = id(ha_time).now();
+          char dbuf[12] = "--.--.----";
+          if (now.is_valid()) {
+            now.strftime(dbuf, sizeof(dbuf), "%d.%m.%Y");
+          }
+          id(ui_date_text) = dbuf;
+      - lvgl.label.update:
+          id: hdr_date
+          text: !lambda return id(ui_date_text).c_str();
+
+  - id: ui_update_wifi
+    mode: restart
+    then:
+      - lvgl.label.update:
+          id: hdr_wifi
+          text: !lambda |-
+            return std::string(id(ui_wifi_ok) ? "${ICO_WIFI}" : "${ICO_WIFI_OFF}");
+
+  - id: ui_update_battery
+    mode: restart
+    then:
+      - lvgl.label.update:
+          id: hdr_battery
+          text:
+            format: "%d%%"
+            args:
+              - '(int) roundf(id(m5paper_battery_level).state)'
+
+  - id: ui_refresh_header
+    mode: restart
+    then:
+      - lvgl.label.update:
+          id: hdr_title
+          text: !lambda return id(ui_title).c_str();
+      - script.execute: ui_update_time
+      - script.execute: ui_update_wifi
+      - script.execute: ui_update_battery
+
+lvgl:
+  top_layer:
+    widgets:
+      - obj:
+          id: ui_header_bar
+          x: 0
+          y: 0
+          width: 540
+          height: 60
+          styles: st_header_bar
+          clickable: false
+          scrollable: false
+          widgets:
+            - label:
+                id: hdr_date
+                align: LEFT_MID
+                x: 18
+                styles: st_body_text_muted
+                text: "--.--.----"
+
+            - label:
+                id: hdr_title
+                align: LEFT_MID
+                x: 110
+                width: 320
+                styles: st_title_text
+                text_align: center
+                long_mode: DOT
+                text: "Dashboard"
+
+            - label:
+                id: hdr_wifi
+                align: LEFT_MID
+                x: 420
+                width: 20
+                styles: st_icon_text
+                text_align: center
+                text: "${ICO_WIFI_OFF}"
+
+            - label:
+                id: hdr_battery
+                align: LEFT_MID
+                x: 470
+                width: 52
+                styles: st_header_text
+                text_align: right
+                text: "--%"
+
+      - line:
+          id: hdr_divider
+          points:
+            - 0, 60
+            - 540, 60
+          styles: st_divider

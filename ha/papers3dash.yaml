@@ -1,0 +1,280 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# PaperS3 Dashboard — Home Assistant package
+#
+# Place this file at:  config/packages/papers3dash.yaml
+# Reference in configuration.yaml:
+#
+#   homeassistant:
+#     packages:
+#       papers3dash: !include packages/papers3dash.yaml
+#
+# Also add to configuration.yaml directly (packages don't support it):
+#
+#   mqtt_statestream:
+#     base_topic: homeassistant
+#     publish_attributes: true
+#     include:
+#       entities:
+#         - sensor.bathroom_temperature
+#         - sensor.bathroom_humidity
+#         - climate.bathroom_radiator
+#         - binary_sensor.bathroom_window_contact
+#         - sensor.kitchen_temperature
+#         - sensor.kitchen_humidity
+#         - climate.kitchen_radiator
+#         - binary_sensor.kitchen_window_contact
+#         - sensor.bedroom_temperature
+#         - sensor.bedroom_humidity
+#         - climate.bedroom_radiator
+#         - binary_sensor.bedroom_window_contact
+#         - sensor.living_room_temperature
+#         - sensor.living_room_humidity
+#         - climate.living_room_radiator
+#         - binary_sensor.balcony_door_contact
+#         - sensor.childs_room_temperature
+#         - sensor.childs_room_humidity
+#         - climate.arthur_radiator
+#         - binary_sensor.arthur_window_contact
+#         - remote.samsung_7_series_50
+#         - switch.tv_thinklab_l2
+#         - remote.shield
+#         - light.living_led
+#         - light.kitchen_main_led
+#         - switch.arthur_socket
+#         - input_boolean.vac_room_bad
+#         - input_boolean.vac_room_flur
+#         - input_boolean.vac_room_schlafzimmer
+#         - input_boolean.vac_room_wohnzimmer
+#         - input_boolean.vac_room_kinderzimmer
+#         - input_boolean.vac_room_kuche
+#         - input_select.vacuum_repeat
+#         - sensor.outdoor_2_temperature
+#         - sensor.outdoor_2_humidity
+#         - sensor.indoor_carbon_dioxide
+#         - sensor.airquality_1_pm25
+#         - sensor.thinklab_cpu_usage
+#         - sensor.thinklab_mount_mntssd256gb25
+#         - sensor.thinklab_mount_mntdisk500gb25
+#         - sensor.thinklab_mount_mntdisk5tb25
+#         - sensor.thinklab_mount_mntdisk2tb35
+#         - sensor.thinklab_mount_mntdisk8tb35
+#         - switch.lxc_audiobookshelf_102
+#         - switch.lxc_jellyfin_101
+#         - switch.lxc_pihole_103
+#         - switch.lxc_smb_share_106
+#         - switch.lxc_zerotier_one_105
+#         - switch.lxc_sprout_track_108
+#         - switch.vm_haos16_1_100
+#         - light.bedroom_rgb_strip
+#         - light.bedroom_rgb_bulb
+#
+# ─────────────────────────────────────────────────────────────────────────────
+
+automation:
+
+  # ── Push slow-changing sensors on PaperS3 connect ────────────────────────────
+  # Disk usage rarely changes so statestream never republishes on reconnect.
+  # Fires when the PaperS3 connects to MQTT and immediately pushes current values.
+  - alias: "PaperS3 push disk sensors on connect"
+    trigger:
+      - platform: mqtt
+        topic: "papers3dash/availability"
+        payload: "online"
+    action:
+      - repeat:
+          for_each:
+            - entity: sensor.thinklab_mount_mntssd256gb25
+              topic: homeassistant/sensor/thinklab_mount_mntssd256gb25/state
+            - entity: sensor.thinklab_mount_mntdisk500gb25
+              topic: homeassistant/sensor/thinklab_mount_mntdisk500gb25/state
+            - entity: sensor.thinklab_mount_mntdisk5tb25
+              topic: homeassistant/sensor/thinklab_mount_mntdisk5tb25/state
+            - entity: sensor.thinklab_mount_mntdisk2tb35
+              topic: homeassistant/sensor/thinklab_mount_mntdisk2tb35/state
+            - entity: sensor.thinklab_mount_mntdisk8tb35
+              topic: homeassistant/sensor/thinklab_mount_mntdisk8tb35/state
+          sequence:
+            - service: mqtt.publish
+              data:
+                topic: "{{ repeat.item.topic }}"
+                payload: "{{ states(repeat.item.entity) }}"
+                retain: false
+
+  # ── Push bedroom light states on PaperS3 connect ────────────────────────────
+  - alias: "PaperS3 push bedroom lights on connect"
+    trigger:
+      - platform: mqtt
+        topic: "papers3dash/availability"
+        payload: "online"
+    action:
+      - repeat:
+          for_each:
+            - entity: light.bedroom_rgb_strip
+              topic: homeassistant/light/bedroom_rgb_strip/state
+            - entity: light.bedroom_rgb_bulb
+              topic: homeassistant/light/bedroom_rgb_bulb/state
+          sequence:
+            - service: mqtt.publish
+              data:
+                topic: "{{ repeat.item.topic }}"
+                payload: "{{ states(repeat.item.entity) }}"
+                retain: false
+
+  # ── Heating: set temperature ────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT climate set temperature"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/climate/+/set_temperature"
+    action:
+      - service: climate.set_temperature
+        target:
+          entity_id: "climate.{{ trigger.topic.split('/')[2] }}"
+        data:
+          temperature: "{{ trigger.payload | float }}"
+
+  # ── Heating: set preset mode ─────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT climate set preset"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/climate/+/set_preset_mode"
+    action:
+      - service: climate.set_preset_mode
+        target:
+          entity_id: "climate.{{ trigger.topic.split('/')[2] }}"
+        data:
+          preset_mode: "{{ trigger.payload }}"
+
+  # ── Switches ─────────────────────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT switch set"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/switch/+/set"
+    action:
+      - service: "switch.turn_{{ 'on' if trigger.payload == 'ON' else 'off' }}"
+        target:
+          entity_id: "switch.{{ trigger.topic.split('/')[2] }}"
+
+  # ── Lights ───────────────────────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT light set"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/light/+/set"
+    action:
+      - service: "light.turn_{{ 'on' if trigger.payload == 'ON' else 'off' }}"
+        target:
+          entity_id: "light.{{ trigger.topic.split('/')[2] }}"
+
+  # ── Remotes (TV, Shield) ─────────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT remote set"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/remote/+/set"
+    action:
+      - service: "remote.turn_{{ 'on' if trigger.payload == 'ON' else 'off' }}"
+        target:
+          entity_id: "remote.{{ trigger.topic.split('/')[2] }}"
+
+  # ── Vacuum room input_booleans ────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT input_boolean set"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/input_boolean/+/set"
+    action:
+      - service: "input_boolean.turn_{{ 'on' if trigger.payload == 'ON' else 'off' }}"
+        target:
+          entity_id: "input_boolean.{{ trigger.topic.split('/')[2] }}"
+
+  # ── Vacuum repeat input_select ────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT vacuum repeat set"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/input_select/vacuum_repeat/set"
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.vacuum_repeat
+        data:
+          option: "{{ trigger.payload }}"
+
+  # ── Vacuum: start all rooms ───────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT vacuum start all"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/vacuum/roborock_s6_maxv/start"
+    action:
+      - service: vacuum.start
+        target:
+          entity_id: vacuum.roborock_s6_maxv
+
+  # ── Vacuum: pause ─────────────────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT vacuum pause"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/vacuum/roborock_s6_maxv/pause"
+    action:
+      - service: vacuum.pause
+        target:
+          entity_id: vacuum.roborock_s6_maxv
+
+  # ── Vacuum: dock ──────────────────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT vacuum dock"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/vacuum/roborock_s6_maxv/dock"
+    action:
+      - service: vacuum.return_to_base
+        target:
+          entity_id: vacuum.roborock_s6_maxv
+
+  # ── Vacuum: start selected rooms ──────────────────────────────────────────────
+  - alias: "PaperS3 MQTT vacuum start selected rooms"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/script/vacuum_clean_selected_rooms/set"
+    action:
+      - service: script.vacuum_clean_selected_rooms
+
+  # ── Vacuum: go to trashcan ────────────────────────────────────────────────────
+  - alias: "PaperS3 MQTT vacuum go to trashcan"
+    trigger:
+      - platform: mqtt
+        topic: "homeassistant/script/roborock_go_to_trashcan/set"
+    action:
+      - service: script.roborock_go_to_trashcan
+
+  # ── Heating: set HVAC mode (Versatile Thermostat) ────────────────────────────
+  - alias: PaperDash Set HVAC Mode
+    mode: parallel
+    trigger:
+      - platform: mqtt
+        topic: paperdash/climate/+/set_hvac_mode
+    action:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: "climate.{{ trigger.topic.split('/')[2] }}"
+        data:
+          hvac_mode: "{{ trigger.payload }}"
+
+  - alias: PaperDash Set Preset Mode
+    mode: parallel
+    trigger:
+      - platform: mqtt
+        topic: paperdash/climate/+/set_preset_mode
+    action:
+      - service: climate.set_preset_mode
+        target:
+          entity_id: "climate.{{ trigger.topic.split('/')[2] }}"
+        data:
+          preset_mode: "{{ trigger.payload }}"
+
+  - alias: PaperDash Set Temperature
+    mode: parallel
+    trigger:
+      - platform: mqtt
+        topic: paperdash/climate/+/set_temperature
+    action:
+      - service: climate.set_temperature
+        target:
+          entity_id: "climate.{{ trigger.topic.split('/')[2] }}"
+        data:
+          temperature: "{{ trigger.payload | float }}"

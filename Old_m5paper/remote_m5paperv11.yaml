@@ -1,0 +1,244 @@
+esphome:
+  name: remote-m5paperv11
+  friendly_name: remote_m5paperv11
+  on_boot:
+    - priority: -100
+      then:
+        - script.execute: ui_boot_init
+
+esp32:
+  board: m5stack_paper
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    advanced:
+      minimum_chip_revision: "3.1"
+
+external_components:
+  - source: github://Passific/m5paper_esphome
+
+logger:
+  level: INFO
+
+psram:
+
+api:
+  encryption:
+    key: "+TZ9WzyNTvX5JmLiSNIrhQ6jeOFw1yPwJQa1A/eCmQI="
+
+ota:
+  - platform: esphome
+    password: "516ccc32a84d287ebdbe9d07e2b7a4a1"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Remote-M5Paperv11"
+    password: "Svw4IogFcXPe"
+
+captive_portal:
+
+packages:
+  - !include m5paperv11_modules/ui/colors.yaml
+  - !include m5paperv11_modules/ui/globals.yaml
+  - !include m5paperv11_modules/ui/fonts.yaml
+  - !include m5paperv11_modules/ui/icons.yaml
+  - !include m5paperv11_modules/ui/theme.yaml
+  - !include m5paperv11_modules/ui/header.yaml
+  - !include m5paperv11_modules/ui/navigation.yaml
+  - !include m5paperv11_modules/ui/sleep.yaml
+
+  - !include m5paperv11_modules/ha/entities.yaml
+  - !include m5paperv11_modules/ha/sensors.yaml
+  - !include m5paperv11_modules/ha/switch_states.yaml
+  - !include m5paperv11_modules/ha/thinklab_entities.yaml
+
+  - !include m5paperv11_modules/pages/page_dashboard.yaml
+  - !include m5paperv11_modules/pages/page_heating.yaml
+  - !include m5paperv11_modules/pages/heating/page_room_arthur_heating.yaml
+  - !include m5paperv11_modules/pages/heating/page_room_bathroom_heating.yaml
+  - !include m5paperv11_modules/pages/heating/page_room_kitchen_heating.yaml
+  - !include m5paperv11_modules/pages/heating/page_room_bedroom_heating.yaml
+  - !include m5paperv11_modules/pages/heating/page_room_living_heating.yaml
+  - !include m5paperv11_modules/pages/page_switches.yaml
+  - !include m5paperv11_modules/pages/page_cleaning.yaml
+  - !include m5paperv11_modules/pages/page_arthur.yaml
+  - !include m5paperv11_modules/pages/page_climate.yaml
+  - !include m5paperv11_modules/pages/page_thinklab.yaml
+  - !include m5paperv11_modules/pages/page_standby.yaml
+  - !include m5paperv11_modules/pages/page_more.yaml
+
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+
+spi:
+  clk_pin: GPIO14
+  mosi_pin: GPIO12
+  miso_pin: GPIO13
+
+m5paper:
+  battery_power_pin: GPIO5
+  main_power_pin: GPIO2
+
+deep_sleep:
+  id: deep_sleep_1
+  wakeup_pin:
+    number: GPIO38
+    inverted: true
+  wakeup_pin_mode: KEEP_AWAKE
+
+time:
+  - platform: homeassistant
+    id: ha_time
+    timezone: Europe/Berlin
+    on_time_sync:
+      - bm8563.write_time:
+          id: rtc_time
+      - script.execute: ui_update_time
+
+  - platform: bm8563
+    id: rtc_time
+
+display:
+  - platform: it8951e
+    id: my_display
+    model: M5EPD
+    cs_pin: GPIO15
+    reset_pin: GPIO23
+    reset_duration: 100ms
+    busy_pin: GPIO27
+    rotation: 270
+    reversed: true
+    update_interval: never
+    auto_clear_enabled: false
+    full_update_every: 60
+    sleep_when_done: false
+
+touchscreen:
+  - platform: gt911
+    display: my_display
+    id: my_touchscreen
+    update_interval: 16ms
+    calibration:
+      x_min: 0
+      x_max: 540
+      y_min: 0
+      y_max: 960
+    on_touch:
+      then:
+        - script.execute: ui_reset_inactivity
+
+lvgl:
+  displays:
+    - my_display
+  touchscreens:
+    - my_touchscreen
+  buffer_size: 100%
+  update_when_display_idle: true
+
+  on_boot:
+    then:
+      - script.execute: ui_boot_init
+
+  on_draw_end:
+    then:
+      - if:
+          condition:
+            lambda: 'return id(ui_next_draw_gc16) && !id(ui_next_draw_full);'
+          then:
+            - lambda: |-
+                id(my_display).set_full_update_every(60);
+                id(my_display).write_display(esphome::it8951e::IT8951ESensor::UPDATE_MODE_GC16);
+          else:
+            - lambda: |-
+                if (id(ui_next_draw_full)) {
+                  id(my_display).set_full_update_every(1);
+                } else {
+                  id(my_display).set_full_update_every(60);
+                }
+            - component.update: my_display
+
+binary_sensor:
+  - platform: gpio
+    id: btn_right
+    name: "M5Paper Right Button"
+    pin:
+      number: GPIO37
+      inverted: true
+    on_release:
+      then:
+        - script.execute: ui_handle_right
+        - script.execute: ui_reset_inactivity
+
+  - platform: gpio
+    id: btn_left
+    name: "M5Paper Left Button"
+    pin:
+      number: GPIO39
+      inverted: true
+    on_release:
+      then:
+        - script.execute: ui_handle_left
+        - script.execute: ui_reset_inactivity
+
+switch:
+  - platform: restart
+    id: restart_switch
+    name: "Remote Restart"
+
+number:
+  - platform: template
+    id: sleep_time
+    name: "Device Awake Time"
+    optimistic: true
+    min_value: 15
+    max_value: 3600
+    step: 15
+    initial_value: 120
+    restore_value: true
+    unit_of_measurement: "s"
+    device_class: duration
+    mode: box
+
+sensor:
+  - platform: adc
+    id: m5paper_battery_voltage
+    name: "M5Paper Battery Voltage"
+    pin: GPIO35
+    disabled_by_default: true
+    update_interval: 60s
+    attenuation: 12db
+    filters:
+      - multiply: 2
+
+  - platform: template
+    id: m5paper_battery_level
+    name: "M5Paper Battery Level"
+    unit_of_measurement: "%"
+    device_class: battery
+    state_class: measurement
+    update_interval: 60s
+    lambda: |-
+      constexpr float min_level = 3.52;
+      constexpr float max_level = 4.15;
+      return ((id(m5paper_battery_voltage).state - min_level) / (max_level - min_level)) * 100.0;
+    filters:
+      - clamp:
+          min_value: 0
+          max_value: 100
+    on_value:
+      then:
+        - script.execute: ui_update_battery
+
+  - platform: sht3xd
+    temperature:
+      name: "M5Paper Temperature"
+      id: m5paper_temperature
+    humidity:
+      name: "M5Paper Humidity"
+      id: m5paper_humidity
+    address: 0x44
+    update_interval: 30s

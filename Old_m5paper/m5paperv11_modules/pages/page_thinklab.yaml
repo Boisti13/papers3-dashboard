@@ -1,0 +1,290 @@
+lvgl:
+  pages:
+    - id: page_thinklab
+      scrollable: false
+      scrollbar_mode: "OFF"
+      on_load:
+        - script.execute: page_thinklab_prepare
+        - script.execute: thinklab_refresh
+
+      widgets:
+        - obj:
+            id: thinklab_bg
+            x: 0
+            y: 60
+            width: 540
+            height: 812
+            styles: st_page_content
+            scrollable: false
+            scrollbar_mode: "OFF"
+
+            widgets:
+              - obj:
+                  id: thinklab_card_main
+                  x: 20
+                  y: 20
+                  width: 480
+                  height: 220
+                  styles: st_card
+                  scrollable: false
+                  clickable: false
+                  shadow_width: 0
+                  outline_width: 0
+
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        styles: st_body_text
+                        text: "ThinkLab"
+
+                    - label:
+                        x: 0
+                        y: 44
+                        styles: st_body_text_muted
+                        text: "CPU"
+
+                    - label:
+                        id: thinklab_cpu_value
+                        x: 180
+                        y: 44
+                        styles: st_body_text
+                        text: "-- %"
+
+                    - label:
+                        x: 0
+                        y: 84
+                        styles: st_body_text_muted
+                        text: "Disk /mnt/ssd256gb25"
+
+                    - label:
+                        id: thinklab_disk_ssd256_value
+                        x: 180
+                        y: 84
+                        styles: st_body_text
+                        text: "-- %"
+
+                    - label:
+                        x: 0
+                        y: 124
+                        styles: st_body_text_muted
+                        text: "Disk /mnt/disk500gb25"
+
+                    - label:
+                        id: thinklab_disk_500_value
+                        x: 180
+                        y: 124
+                        styles: st_body_text
+                        text: "-- %"
+
+                    - label:
+                        x: 0
+                        y: 164
+                        styles: st_body_text_muted
+                        text: "Disk /mnt/disk5tb25"
+
+                    - label:
+                        id: thinklab_disk_5tb_value
+                        x: 180
+                        y: 164
+                        styles: st_body_text
+                        text: "-- %"
+
+              - obj:
+                  id: thinklab_card_secondary
+                  x: 20
+                  y: 260
+                  width: 480
+                  height: 260
+                  styles: st_card
+                  scrollable: false
+                  clickable: false
+                  shadow_width: 0
+                  outline_width: 0
+
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        styles: st_body_text
+                        text: "Services"
+
+                    - label:
+                        x: 0
+                        y: 44
+                        styles: st_body_text_muted
+                        text: "Audiobookshelf"
+
+                    - label:
+                        id: thinklab_srv_audiobookshelf
+                        x: 260
+                        y: 44
+                        styles: st_body_text
+                        text: "--"
+
+                    - label:
+                        x: 0
+                        y: 78
+                        styles: st_body_text_muted
+                        text: "Jellyfin"
+
+                    - label:
+                        id: thinklab_srv_jellyfin
+                        x: 260
+                        y: 78
+                        styles: st_body_text
+                        text: "--"
+
+                    - label:
+                        x: 0
+                        y: 112
+                        styles: st_body_text_muted
+                        text: "Pi-hole"
+
+                    - label:
+                        id: thinklab_srv_pihole
+                        x: 260
+                        y: 112
+                        styles: st_body_text
+                        text: "--"
+
+                    - label:
+                        x: 0
+                        y: 146
+                        styles: st_body_text_muted
+                        text: "SMB Share"
+
+                    - label:
+                        id: thinklab_srv_smb
+                        x: 260
+                        y: 146
+                        styles: st_body_text
+                        text: "--"
+
+                    - label:
+                        x: 0
+                        y: 180
+                        styles: st_body_text_muted
+                        text: "ZeroTier"
+
+                    - label:
+                        id: thinklab_srv_zerotier
+                        x: 260
+                        y: 180
+                        styles: st_body_text
+                        text: "--"
+
+                    - label:
+                        x: 0
+                        y: 214
+                        styles: st_body_text_muted
+                        text: "Sprout Track"
+
+                    - label:
+                        id: thinklab_srv_sprout
+                        x: 260
+                        y: 214
+                        styles: st_body_text
+                        text: "--"
+
+              - obj:
+                  id: thinklab_card_tertiary
+                  x: 20
+                  y: 540
+                  width: 480
+                  height: 120
+                  styles: st_card
+                  scrollable: false
+                  clickable: false
+                  shadow_width: 0
+                  outline_width: 0
+
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        styles: st_body_text
+                        text: "HAOS VM"
+
+                    - label:
+                        x: 0
+                        y: 44
+                        styles: st_body_text_muted
+                        text: "vm_haos16_1_100"
+
+                    - label:
+                        id: thinklab_srv_haos
+                        x: 260
+                        y: 44
+                        styles: st_body_text
+                        text: "--"
+
+script:
+  - id: page_thinklab_prepare
+    mode: restart
+    then:
+      - lambda: |-
+          id(ui_title) = "ThinkLab";
+          id(ui_parent_page) = 0;
+          id(ui_left_enabled) = true;
+          id(ui_right_enabled) = true;
+      - script.execute: ui_apply_chrome
+
+  - id: thinklab_refresh
+    mode: restart
+    then:
+      - lvgl.label.update:
+          id: thinklab_cpu_value
+          text:
+            format: "%.1f %%"
+            args:
+              - 'id(s_thinklab_cpu_usage).state'
+
+      - lvgl.label.update:
+          id: thinklab_disk_ssd256_value
+          text:
+            format: "%.1f %%"
+            args:
+              - 'id(s_thinklab_mount_mntssd256gb25).state'
+
+      - lvgl.label.update:
+          id: thinklab_disk_500_value
+          text:
+            format: "%.1f %%"
+            args:
+              - 'id(s_thinklab_mount_mntdisk500gb25).state'
+
+      - lvgl.label.update:
+          id: thinklab_disk_5tb_value
+          text:
+            format: "%.1f %%"
+            args:
+              - 'id(s_thinklab_mount_mntdisk5tb25).state'
+
+      - lvgl.label.update:
+          id: thinklab_srv_audiobookshelf
+          text: !lambda 'return std::string(id(sw_lxc_audiobookshelf_102).state ? "ON" : "OFF");'
+
+      - lvgl.label.update:
+          id: thinklab_srv_jellyfin
+          text: !lambda 'return std::string(id(sw_lxc_jellyfin_101).state ? "ON" : "OFF");'
+
+      - lvgl.label.update:
+          id: thinklab_srv_pihole
+          text: !lambda 'return std::string(id(sw_lxc_pihole_103).state ? "ON" : "OFF");'
+
+      - lvgl.label.update:
+          id: thinklab_srv_smb
+          text: !lambda 'return std::string(id(sw_lxc_smb_share_106).state ? "ON" : "OFF");'
+
+      - lvgl.label.update:
+          id: thinklab_srv_zerotier
+          text: !lambda 'return std::string(id(sw_lxc_zerotier_one_105).state ? "ON" : "OFF");'
+
+      - lvgl.label.update:
+          id: thinklab_srv_sprout
+          text: !lambda 'return std::string(id(sw_lxc_sprout_track_108).state ? "ON" : "OFF");'
+
+      - lvgl.label.update:
+          id: thinklab_srv_haos
+          text: !lambda 'return std::string(id(sw_vm_haos16_1_100).state ? "ON" : "OFF");'

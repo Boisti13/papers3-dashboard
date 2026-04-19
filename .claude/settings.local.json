@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:/Users/Bastian/.platformio/penv/Scripts/pio.exe\" run:*)",
+      "Bash(xargs grep:*)",
+      "Bash(\"C:/Users/Bastian/.platformio/penv/Scripts/pio.exe\" pkg:*)",
+      "Bash(\"C:/Users/Bastian/.platformio/penv/Scripts/pio.exe\" platform:*)",
+      "Bash(\"C:/Users/Bastian/.platformio/penv/Scripts/pip.exe\" install:*)",
+      "Bash(pio run:*)",
+      "Bash(~/.platformio/penv/Scripts/pio run:*)",
+      "WebFetch(domain:docs.m5stack.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(~/.platformio/penv/Scripts/pio device:*)",
+      "Bash(kill %1)",
+      "WebFetch(domain:api.github.com)",
+      "WebSearch",
+      "WebFetch(domain:m5stack.oss-cn-shenzhen.aliyuncs.com)",
+      "WebFetch(domain:patch-diff.githubusercontent.com)",
+      "WebFetch(domain:deepwiki.com)",
+      "Bash(sed -i 's/materialdesignicons-webfont/lv_font_mdi_48/g; s/MATERIALDESIGNICONS-WEBFONT/LV_FONT_MDI_48/g' src/fonts/materialdesignicons-webfont.c)",
+      "Bash(sed -i '/\\\\.static_bitmap = 0/d' src/fonts/materialdesignicons-webfont.c)",
+      "WebFetch(domain:community.m5stack.com)",
+      "Read(//c/Users/Bastian/.platformio/packages/framework-arduinoespressif32/**)",
+      "Read(//c/Users/Bastian/.platformio/libdeps/PaperS3/**)",
+      "Bash(grep -v \"^.*0$\")",
+      "Read(//c/Users/Bastian/.claude/projects/c--Users-Bastian-Documents-PlatformIO-Projects-PaperS3Dash/memory/**)",
+      "Bash(curl -X POST http://192.168.178.164/update -F \"firmware=@c:\\\\Users\\\\Bastian\\\\Documents\\\\PlatformIO\\\\Projects\\\\PaperS3Dash\\\\.pio\\\\build\\\\PaperS3\\\\firmware.bin\" --progress-bar)",
+      "Bash(curl -X POST http://192.168.178.164/update -F \"firmware=@.pio/build/PaperS3/firmware.bin\" --progress-bar)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://192.168.178.164/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" --connect-timeout 5 http://192.168.178.164/)",
+      "Bash(curl -X POST \"http://192.168.178.164/update\" -F \"firmware=@.pio/build/PaperS3/firmware.bin\" --progress-bar)",
+      "Read(//c/Users/Bastian/.claude/projects/c--Users-Bastian-Documents-PlatformIO-Projects-PaperS3Dash/**)",
+      "Bash(node -e ' *)",
+      "Bash(awk -F: '{print $1}')",
+      "Bash(awk '$1 < 3782')",
+      "Bash(python3 -c \"import sys,json; d=json.loads\\(sys.stdin.read\\(\\)\\); [print\\(c['input']['content']\\) for c in d['message']['content'] if c.get\\('type'\\)=='tool_use' and 'content' in c.get\\('input',{}\\)]\")",
+      "Bash(sed -n '3779p' \"c:/Users/Bastian/.claude/projects/c--Users-Bastian-Documents-PlatformIO-Projects-PaperS3Dash/757581db-8218-4abd-a833-406bb09c331e.jsonl\")",
+      "Bash(grep -o '\"src\\\\\\\\\\\\\\\\power\\\\\\\\\\\\\\\\sleep\\\\.cpp[^}]*}')",
+      "Bash(grep -o '\"src\\\\\\\\\\\\\\\\[^\"]*\":\\\\{\"backupFileName\":\"[^\"]*\"')",
+      "Bash(grep -oE '\"src\\\\\\\\\\\\\\\\power\\\\\\\\\\\\\\\\sleep\\\\.cpp\":\\\\{\"backupFileName\":\"[^\"]*\",\"version\":[0-9]+')",
+      "Read(//tmp/**)",
+      "Read(//c/Users/Bastian/.claude/file-history/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Bastian\\.claude\\projects\\c--Users-Bastian-Documents-PlatformIO-Projects-PaperS3Dash\\memory",
+      "c:\\Users\\Bastian\\.claude\\projects\\c--Users-Bastian-Documents-PlatformIO-Projects-PaperS3Dash"
+    ]
+  }
+}

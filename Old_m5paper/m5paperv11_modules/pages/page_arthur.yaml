@@ -1,0 +1,53 @@
+lvgl:
+  pages:
+    - id: page_arthur
+      scrollable: false
+      scrollbar_mode: "OFF"
+      on_load:
+        - script.execute: page_arthur_prepare
+      widgets:
+        - obj:
+            id: arthur_bg
+            x: 0
+            y: 60
+            width: 540
+            height: 812
+            styles: st_page_content
+            scrollable: false
+            scrollbar_mode: "OFF"
+            widgets:
+              - obj:
+                  id: arthur_card_main
+                  x: 20
+                  y: 20
+                  width: 480
+                  height: 170
+                  styles: st_card
+                  scrollable: false
+                  clickable: false
+                  shadow_width: 0
+                  outline_width: 0
+                  widgets:
+                    - label:
+                        x: 0
+                        y: 0
+                        styles: st_body_text
+                        text: "Arthur"
+
+                    - label:
+                        x: 0
+                        y: 44
+                        width: 440
+                        styles: st_body_text_muted
+                        text: "Arthur page shell ready."
+
+script:
+  - id: page_arthur_prepare
+    mode: restart
+    then:
+      - lambda: |-
+          id(ui_title) = "Arthur";
+          id(ui_parent_page) = 0;
+          id(ui_left_enabled) = true;
+          id(ui_right_enabled) = true;
+      - script.execute: ui_apply_chrome

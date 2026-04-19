@@ -1,0 +1,38 @@
+# remote_modules/ui/sleep.yaml
+# M5Paper sleep / wake policy.
+# - Inactivity-based deep sleep
+# - Wake ONLY via GPIO38 (power button) — no RTC auto-wake timer
+
+script:
+  - id: ui_reset_inactivity
+    mode: restart
+    then:
+      - script.stop: inactivity_timer
+      - script.execute: inactivity_timer
+
+  - id: inactivity_timer
+    mode: restart
+    then:
+      - delay: !lambda |-
+          return (uint32_t)(id(sleep_time).state * 1000.0f);
+      - script.execute: ui_enter_standby
+
+  - id: ui_force_sleep
+    mode: restart
+    then:
+      - script.execute: ui_enter_standby
+
+  - id: ui_enter_standby
+    mode: restart
+    then:
+      - lvgl.widget.hide: ui_header_bar
+      - lvgl.widget.hide: hdr_divider
+      - lvgl.widget.hide: ui_footer_bar
+      - lvgl.widget.hide: nav_divider
+      - lvgl.page.show: page_standby
+      - lambda: |-
+          id(ui_next_draw_full) = true;
+          id(ui_next_draw_gc16) = false;
+      # Wait for LVGL to render + full IT8951E waveform to complete (~2-3 s)
+      - delay: 7s
+      - deep_sleep.enter: deep_sleep_1

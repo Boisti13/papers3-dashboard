@@ -1,0 +1,108 @@
+text_sensor:
+  - platform: homeassistant
+    id: st_tv
+    entity_id: ${ENT_REMOTE_TV}
+    internal: true
+    on_value:
+      then:
+        - script.execute: ui_full_refresh_once
+        - lambda: |-
+            if (!id(page_switches).is_showing()) return;
+            const std::string &s = x;
+            const bool on  = s == "on";
+            const bool bad = s.empty() || s == "unknown" || s == "unavailable";
+            lv_obj_set_style_bg_color(id(sw_tile_tv), lv_color_hex(on ? 0x999999 : 0xDDDDDD), 0);
+            lv_obj_set_style_bg_opa(id(sw_tile_tv), LV_OPA_COVER, 0);
+            lv_obj_set_style_border_color(id(sw_tile_tv), lv_color_hex(bad || on ? 0x777777 : 0xBBBBBB), 0);
+            lv_obj_set_style_border_width(id(sw_tile_tv), bad ? 2 : 1, 0);
+            lv_label_set_text(id(sw_status_tv), on ? "ON" : "OFF");
+
+  - platform: homeassistant
+    id: st_tv_socket
+    entity_id: ${ENT_SW_TV_SOCKET}
+    internal: true
+    on_value:
+      then:
+        - script.execute: ui_full_refresh_once
+        - lambda: |-
+            if (!id(page_switches).is_showing()) return;
+            const std::string &s = x;
+            const bool on  = s == "on";
+            const bool bad = s.empty() || s == "unknown" || s == "unavailable";
+            lv_obj_set_style_bg_color(id(sw_tile_tv_socket), lv_color_hex(on ? 0x999999 : 0xDDDDDD), 0);
+            lv_obj_set_style_bg_opa(id(sw_tile_tv_socket), LV_OPA_COVER, 0);
+            lv_obj_set_style_border_color(id(sw_tile_tv_socket), lv_color_hex(bad || on ? 0x777777 : 0xBBBBBB), 0);
+            lv_obj_set_style_border_width(id(sw_tile_tv_socket), bad ? 2 : 1, 0);
+            lv_label_set_text(id(sw_status_tv_socket), on ? "ON" : "OFF");
+
+  - platform: homeassistant
+    id: st_shield
+    entity_id: ${ENT_REMOTE_SHIELD}
+    internal: true
+    on_value:
+      then:
+        - script.execute: ui_full_refresh_once
+        - lambda: |-
+            if (!id(page_switches).is_showing()) return;
+            const std::string &s = x;
+            const bool on  = s == "on";
+            const bool bad = s.empty() || s == "unknown" || s == "unavailable";
+            lv_obj_set_style_bg_color(id(sw_tile_shield), lv_color_hex(on ? 0x999999 : 0xDDDDDD), 0);
+            lv_obj_set_style_bg_opa(id(sw_tile_shield), LV_OPA_COVER, 0);
+            lv_obj_set_style_border_color(id(sw_tile_shield), lv_color_hex(bad || on ? 0x777777 : 0xBBBBBB), 0);
+            lv_obj_set_style_border_width(id(sw_tile_shield), bad ? 2 : 1, 0);
+            lv_label_set_text(id(sw_status_shield), on ? "ON" : "OFF");
+
+  - platform: homeassistant
+    id: st_living_led
+    entity_id: ${ENT_LIGHT_LIVING_LED}
+    internal: true
+    on_value:
+      then:
+        - script.execute: ui_full_refresh_once
+        - lambda: |-
+            if (!id(page_switches).is_showing()) return;
+            const std::string &s = x;
+            const bool on  = s == "on";
+            const bool bad = s.empty() || s == "unknown" || s == "unavailable";
+            lv_obj_set_style_bg_color(id(sw_tile_living_led), lv_color_hex(on ? 0x999999 : 0xDDDDDD), 0);
+            lv_obj_set_style_bg_opa(id(sw_tile_living_led), LV_OPA_COVER, 0);
+            lv_obj_set_style_border_color(id(sw_tile_living_led), lv_color_hex(bad || on ? 0x777777 : 0xBBBBBB), 0);
+            lv_obj_set_style_border_width(id(sw_tile_living_led), bad ? 2 : 1, 0);
+            lv_label_set_text(id(sw_status_living_led), on ? "ON" : "OFF");
+
+  - platform: homeassistant
+    id: st_kitchen
+    entity_id: ${ENT_LIGHT_KITCHEN_MAIN}
+    internal: true
+    on_value:
+      then:
+        - script.execute: ui_full_refresh_once
+        - lambda: |-
+            if (!id(page_switches).is_showing()) return;
+            const std::string &s = x;
+            const bool on  = s == "on";
+            const bool bad = s.empty() || s == "unknown" || s == "unavailable";
+            lv_obj_set_style_bg_color(id(sw_tile_kitchen), lv_color_hex(on ? 0x999999 : 0xDDDDDD), 0);
+            lv_obj_set_style_bg_opa(id(sw_tile_kitchen), LV_OPA_COVER, 0);
+            lv_obj_set_style_border_color(id(sw_tile_kitchen), lv_color_hex(bad || on ? 0x777777 : 0xBBBBBB), 0);
+            lv_obj_set_style_border_width(id(sw_tile_kitchen), bad ? 2 : 1, 0);
+            lv_label_set_text(id(sw_status_kitchen), on ? "ON" : "OFF");
+
+  - platform: homeassistant
+    id: st_heatlamp
+    entity_id: ${ENT_SW_ARTHUR_SOCKET}
+    internal: true
+    on_value:
+      then:
+        - script.execute: ui_full_refresh_once
+        - lambda: |-
+            if (!id(page_switches).is_showing()) return;
+            const std::string &s = x;
+            const bool on  = s == "on";
+            const bool bad = s.empty() || s == "unknown" || s == "unavailable";
+            lv_obj_set_style_bg_color(id(sw_tile_heatlamp), lv_color_hex(on ? 0x999999 : 0xDDDDDD), 0);
+            lv_obj_set_style_bg_opa(id(sw_tile_heatlamp), LV_OPA_COVER, 0);
+            lv_obj_set_style_border_color(id(sw_tile_heatlamp), lv_color_hex(bad || on ? 0x777777 : 0xBBBBBB), 0);
+            lv_obj_set_style_border_width(id(sw_tile_heatlamp), bad ? 2 : 1, 0);
+            lv_label_set_text(id(sw_status_heatlamp), on ? "ON" : "OFF");

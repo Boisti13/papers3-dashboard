@@ -1,0 +1,21 @@
+# m5paperv11_modules/pages/heating/page_room_hallway_heating.yaml
+# Room detail (Hallway) — placeholder — scripts only (drawing is in display lambda, page index 14).
+
+script:
+  - id: page_room_hallway_prepare
+    mode: restart
+    then:
+      - lambda: |-
+          id(ui_title) = "Hallway";
+
+          id(ui_left_mode) = 4;               // GOTO dashboard
+          id(ui_left_target) = "dashboard";
+          id(ui_left_icon) = "\U000F02DC";
+          id(ui_left_enabled) = true;
+
+          id(ui_right_mode) = 4;              // GOTO heating
+          id(ui_right_target) = "heating";
+          id(ui_right_icon) = "\U000F0141";   // mdi:chevron-left
+          id(ui_right_enabled) = true;
+
+      - script.execute: ui_header_apply
