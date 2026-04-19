@@ -319,8 +319,12 @@ void settings_page_update_wifi(bool connected, const char *ssid, int8_t rssi, co
     if (s_lbl_wifi_ssid)   lv_label_set_text(s_lbl_wifi_ssid,   ssid && *ssid ? ssid : "—");
     if (s_lbl_wifi_rssi) {
         if (connected) {
-            char buf[16];
-            snprintf(buf, sizeof(buf), "%d dBm", rssi);
+            const char *quality = rssi >= -55 ? "Excellent"
+                                : rssi >= -65 ? "Good"
+                                : rssi >= -75 ? "Weak"
+                                :               "Poor";
+            char buf[32];
+            snprintf(buf, sizeof(buf), "%d dBm (%s)", rssi, quality);
             lv_label_set_text(s_lbl_wifi_rssi, buf);
         } else {
             lv_label_set_text(s_lbl_wifi_rssi, "—");
