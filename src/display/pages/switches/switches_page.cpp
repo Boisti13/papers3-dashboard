@@ -9,7 +9,7 @@
 
 // ── Layout ────────────────────────────────────────────────────────────────────
 #define SW_COLS   2
-#define SW_ROWS   3
+#define SW_ROWS   4
 #define SW_TILE_W ((EPD_WIDTH  - PAD * 2 - GAP * (SW_COLS - 1)) / SW_COLS)
 #define SW_TILE_H ((CONTENT_H  - PAD * 2 - GAP * (SW_ROWS - 1)) / SW_ROWS)
 
@@ -24,13 +24,15 @@ struct SwTile {
     bool        on;
 };
 
-static SwTile s_sw_tiles[6] = {
-    { "TV",          MDI_TELEVISION,    TOPIC_SW_TV_STATE,       TOPIC_SW_TV_CMD,       nullptr, nullptr, false },
-    { "TV Socket",   MDI_POWER_SOCKET,  TOPIC_SW_TVSOCK_STATE,   TOPIC_SW_TVSOCK_CMD,   nullptr, nullptr, false },
-    { "Shield",      MDI_NVIDIA,        TOPIC_SW_SHIELD_STATE,   TOPIC_SW_SHIELD_CMD,   nullptr, nullptr, false },
-    { "Living LED",  MDI_LIGHTBULB,     TOPIC_SW_LIVING_STATE,   TOPIC_SW_LIVING_CMD,   nullptr, nullptr, false },
-    { "Kitchen",     MDI_SILVERWARE_FORK, TOPIC_SW_KITCHEN_STATE, TOPIC_SW_KITCHEN_CMD, nullptr, nullptr, false },
-    { "Heatlamp",    MDI_HEAT_WAVE,     TOPIC_SW_HEATLAMP_STATE, TOPIC_SW_HEATLAMP_CMD, nullptr, nullptr, false },
+static SwTile s_sw_tiles[8] = {
+    { "TV",          MDI_TELEVISION,      TOPIC_SW_TV_STATE,       TOPIC_SW_TV_CMD,       nullptr, nullptr, false },
+    { "TV Socket",   MDI_POWER_SOCKET,    TOPIC_SW_TVSOCK_STATE,   TOPIC_SW_TVSOCK_CMD,   nullptr, nullptr, false },
+    { "Shield",      MDI_NVIDIA,          TOPIC_SW_SHIELD_STATE,   TOPIC_SW_SHIELD_CMD,   nullptr, nullptr, false },
+    { "Living LED",  MDI_LIGHTBULB,       TOPIC_SW_LIVING_STATE,   TOPIC_SW_LIVING_CMD,   nullptr, nullptr, false },
+    { "Kitchen",     MDI_SILVERWARE_FORK, TOPIC_SW_KITCHEN_STATE,  TOPIC_SW_KITCHEN_CMD,  nullptr, nullptr, false },
+    { "Heatlamp",    MDI_HEAT_WAVE,       TOPIC_SW_HEATLAMP_STATE, TOPIC_SW_HEATLAMP_CMD, nullptr, nullptr, false },
+    { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false },
+    { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, false },
 };
 
 static lv_obj_t *s_page_switches = nullptr;
@@ -59,20 +61,24 @@ static void cb_sw_tile(lv_event_t *e) {
 void build_page_switches() {
     s_page_switches = make_page();
 
-    for (int i = 0; i < 6; i++) {
-        int     row = i / SW_COLS;
-        int     col = i % SW_COLS;
-        int32_t x   = col * (SW_TILE_W + GAP);
-        int32_t y   = row * (SW_TILE_H + GAP);
+    for (int i = 0; i < SW_COLS * SW_ROWS; i++) {
+        int     row  = i / SW_COLS;
+        int     col  = i % SW_COLS;
+        int32_t x    = col * (SW_TILE_W + GAP);
+        int32_t y    = row * (SW_TILE_H + GAP);
+        bool    empty = (s_sw_tiles[i].name == nullptr);
 
         lv_obj_t *btn = lv_btn_create(s_page_switches);
         lv_obj_remove_style_all(btn);
         lv_obj_add_style(btn, &g_sty_btn, LV_PART_MAIN);
         lv_obj_set_size(btn, SW_TILE_W, SW_TILE_H);
         lv_obj_set_pos(btn, x, y);
-        lv_obj_add_event_cb(btn, cb_sw_tile, LV_EVENT_CLICKED, &s_sw_tiles[i]);
         lv_obj_set_style_radius(btn, 12, 0);
         s_sw_tiles[i].btn = btn;
+
+        if (empty) continue;
+
+        lv_obj_add_event_cb(btn, cb_sw_tile, LV_EVENT_CLICKED, &s_sw_tiles[i]);
 
         // Status label — top-right
         s_sw_tiles[i].lbl_status = lv_label_create(btn);
@@ -93,7 +99,6 @@ void build_page_switches() {
         lv_label_set_text(lbl_name, s_sw_tiles[i].name);
         lv_obj_align(lbl_name, LV_ALIGN_BOTTOM_MID, 0, -8);
 
-        // Apply state that may have arrived via retained MQTT before page built
         apply_sw_tile_style(&s_sw_tiles[i]);
     }
 }
@@ -102,7 +107,8 @@ lv_obj_t *get_page_switches() { return s_page_switches; }
 
 // ── Update functions ──────────────────────────────────────────────────────────
 bool switches_page_update_switch(const char *topic, bool on) {
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < SW_COLS * SW_ROWS; i++) {
+        if (!s_sw_tiles[i].topic_state) continue;
         if (strcmp(topic, s_sw_tiles[i].topic_state) == 0) {
             s_sw_tiles[i].on = on;
             if (s_sw_tiles[i].btn) apply_sw_tile_style(&s_sw_tiles[i]);
