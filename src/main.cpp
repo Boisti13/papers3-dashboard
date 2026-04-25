@@ -191,6 +191,7 @@ void loop() {
         ui_update_battery(v, p, chg, usb);
         ui_update_wifi(connected, rssi);
         settings_page_update_wifi(connected, WIFI_SSID, rssi, ip.c_str(), mqtt_connected());
+        settings_page_update_battery(v, p, chg, usb);
         last_wifi = connected;
         last_usb  = usb;
         mqtt_publish_status(p, rssi);
@@ -205,7 +206,11 @@ void loop() {
     bool usb_now = battery_usb_connected();
     if ((int)usb_now != last_usb) {
         last_usb = usb_now;
-        ui_update_battery(battery_voltage(), battery_percent(), battery_charging(), usb_now);
+        float v  = battery_voltage();
+        uint8_t p = battery_percent();
+        bool chg = battery_charging();
+        ui_update_battery(v, p, chg, usb_now);
+        settings_page_update_battery(v, p, chg, usb_now);
     }
 
     // Yield to background tasks (WiFi stack, watchdog)

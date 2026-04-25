@@ -13,11 +13,13 @@ static lv_obj_t *s_lbl_inact_val   = nullptr;
 static lv_obj_t *s_lbl_ls_val      = nullptr;
 static lv_obj_t *s_btn_ota         = nullptr;
 static lv_obj_t *s_lbl_ota_status  = nullptr;
-static lv_obj_t *s_lbl_wifi_status = nullptr;
 static lv_obj_t *s_lbl_wifi_ssid   = nullptr;
 static lv_obj_t *s_lbl_wifi_rssi   = nullptr;
 static lv_obj_t *s_lbl_wifi_ip     = nullptr;
 static lv_obj_t *s_lbl_mqtt_status = nullptr;
+static lv_obj_t *s_lbl_bat_usb     = nullptr;
+static lv_obj_t *s_lbl_bat_voltage = nullptr;
+static lv_obj_t *s_lbl_bat_pct     = nullptr;
 
 // ── Label updaters ────────────────────────────────────────────────────────────
 static void update_inact_label() {
@@ -192,7 +194,7 @@ void build_page_settings() {
     // heading y=0 (28pt ~34px), row1 y=48, row2 y=108, card outer=200
     const int32_t row1_y        = 48;
     const int32_t row2_y        = 108;
-    const int32_t sleep_card_h  = 200;
+    const int32_t sleep_card_h  = 182;  // PAD+108+50+8
 
     lv_obj_t *card1 = lv_obj_create(s_page_settings);
     lv_obj_remove_style_all(card1);
@@ -226,9 +228,9 @@ void build_page_settings() {
     // heading y=0, button y=48 h=70, status label y=130, card outer=200
     // OTA card: heading → status label → button (button anchored to bottom with 8px gap)
     // Physical button bottom = PAD + btn_y + btn_h; card_h = that + 8
-    const int32_t ota_btn_h  = 70;
-    const int32_t ota_btn_y  = 72;   // content y; physical bottom = 16+72+70=158
-    const int32_t ota_card_h = 166;  // 158 + 8px gap
+    const int32_t ota_btn_h  = 60;
+    const int32_t ota_btn_y  = 44;   // content y; physical bottom = 16+44+60=120
+    const int32_t ota_card_h = 128;  // 120 + 8px gap
     const int32_t ota_card_y = sleep_card_h + GAP;
 
     lv_obj_t *card2 = lv_obj_create(s_page_settings);
@@ -244,16 +246,16 @@ void build_page_settings() {
         lv_label_set_text(h, "OTA Update");
         lv_obj_set_pos(h, 0, 0);
 
-        s_lbl_ota_status = lv_label_create(card2);
-        lv_obj_add_style(s_lbl_ota_status, &g_sty_lbl_md, 0);
-        lv_label_set_text(s_lbl_ota_status, "");
-        lv_obj_set_pos(s_lbl_ota_status, 0, 38);
-
         s_btn_ota = lv_btn_create(card2);
         lv_obj_remove_style_all(s_btn_ota);
         lv_obj_add_style(s_btn_ota, &g_sty_btn, 0);
         lv_obj_set_size(s_btn_ota, inner_w, ota_btn_h);
         lv_obj_set_pos(s_btn_ota, 0, ota_btn_y);
+
+        s_lbl_ota_status = lv_label_create(card2);
+        lv_obj_add_style(s_lbl_ota_status, &g_sty_lbl_md, 0);
+        lv_label_set_text(s_lbl_ota_status, "");
+        lv_obj_set_pos(s_lbl_ota_status, 0, ota_btn_y + ota_btn_h + 4);
         lv_obj_add_event_cb(s_btn_ota, cb_ota, LV_EVENT_CLICKED, nullptr);
         {
             lv_obj_t *l = lv_label_create(s_btn_ota);
@@ -267,9 +269,9 @@ void build_page_settings() {
     const int32_t wifi_card_y = ota_card_y + ota_card_h + GAP;
     const int32_t row_h       = 36;
     const int32_t val_x       = 160;
-    // 5 rows + button: heading(44) + 5*row_h(180) + gap(8) + btn(60) + 8px bottom gap
-    // Physical btn bottom = PAD + 44 + 5*row_h + 8 + 60 = 16+44+180+8+60=308; card_h=316
-    const int32_t wifi_card_h = 316;
+    // 4 rows + button: heading(44) + 4*row_h(144) + gap(8) + btn(60) + 8px bottom gap
+    // Physical btn bottom = PAD + 44 + 4*row_h + 8 + 60 = 16+44+144+8+60=272; card_h=280
+    const int32_t wifi_card_h = 280;
 
     lv_obj_t *card3 = lv_obj_create(s_page_settings);
     lv_obj_remove_style_all(card3);
@@ -298,17 +300,16 @@ void build_page_settings() {
             return v;
         };
 
-        s_lbl_wifi_status = make_row(44,              "WiFi:",   "—");
-        s_lbl_wifi_ssid   = make_row(44 + row_h,     "SSID:",   "—");
-        s_lbl_wifi_rssi   = make_row(44 + row_h * 2, "Signal:", "—");
-        s_lbl_wifi_ip     = make_row(44 + row_h * 3, "IP:",     "—");
-        s_lbl_mqtt_status = make_row(44 + row_h * 4, "MQTT:",   "—");
+        s_lbl_wifi_ssid   = make_row(44,              "SSID:",   "—");
+        s_lbl_wifi_rssi   = make_row(44 + row_h,     "Signal:", "—");
+        s_lbl_wifi_ip     = make_row(44 + row_h * 2, "IP:",     "—");
+        s_lbl_mqtt_status = make_row(44 + row_h * 3, "MQTT:",   "—");
 
         lv_obj_t *btn = lv_btn_create(card3);
         lv_obj_remove_style_all(btn);
         lv_obj_add_style(btn, &g_sty_btn, 0);
         lv_obj_set_size(btn, inner_w, 60);
-        lv_obj_set_pos(btn, 0, 44 + row_h * 5 + 8);
+        lv_obj_set_pos(btn, 0, 44 + row_h * 4 + 8);
         lv_obj_add_event_cb(btn, cb_wifi_reconnect, LV_EVENT_CLICKED, nullptr);
         {
             lv_obj_t *l = lv_label_create(btn);
@@ -317,12 +318,46 @@ void build_page_settings() {
             lv_obj_center(l);
         }
     }
+    // ── Card 4: Battery ───────────────────────────────────────────────────────
+    const int32_t bat_card_y = wifi_card_y + wifi_card_h + GAP;
+    // heading(44) + 3*row_h(108) + 8 bottom gap; physical bottom = PAD+44+108+8=176
+    const int32_t bat_card_h = 160;
+
+    lv_obj_t *card4 = lv_obj_create(s_page_settings);
+    lv_obj_remove_style_all(card4);
+    lv_obj_add_style(card4, &g_sty_card, 0);
+    lv_obj_set_size(card4, card_w, bat_card_h);
+    lv_obj_set_pos(card4, 0, bat_card_y);
+    lv_obj_clear_flag(card4, LV_OBJ_FLAG_SCROLLABLE);
+
+    {
+        lv_obj_t *h = lv_label_create(card4);
+        lv_obj_add_style(h, &g_sty_lbl_lg, 0);
+        lv_label_set_text(h, "Battery");
+        lv_obj_set_pos(h, 0, 0);
+
+        auto make_row = [&](int32_t y, const char *key, const char *val) -> lv_obj_t * {
+            lv_obj_t *k = lv_label_create(card4);
+            lv_obj_add_style(k, &g_sty_lbl_md, 0);
+            lv_label_set_text(k, key);
+            lv_obj_set_pos(k, 0, y);
+
+            lv_obj_t *v = lv_label_create(card4);
+            lv_obj_add_style(v, &g_sty_lbl_md, 0);
+            lv_label_set_text(v, val);
+            lv_obj_set_pos(v, val_x, y);
+            return v;
+        };
+
+        s_lbl_bat_usb     = make_row(44,          "USB:",     "—");
+        s_lbl_bat_voltage = make_row(44 + row_h,  "Voltage:", "—");
+        s_lbl_bat_pct     = make_row(44 + row_h * 2, "Level:", "—");
+    }
 }
 
 lv_obj_t *get_page_settings() { return s_page_settings; }
 
 void settings_page_update_wifi(bool connected, const char *ssid, int8_t rssi, const char *ip, bool mqtt_ok) {
-    if (s_lbl_wifi_status) lv_label_set_text(s_lbl_wifi_status, connected ? "Connected" : "Not Connected");
     if (s_lbl_wifi_ssid)   lv_label_set_text(s_lbl_wifi_ssid,   ssid && *ssid ? ssid : "—");
     if (s_lbl_wifi_rssi) {
         if (connected) {
@@ -339,6 +374,24 @@ void settings_page_update_wifi(bool connected, const char *ssid, int8_t rssi, co
     }
     if (s_lbl_wifi_ip)     lv_label_set_text(s_lbl_wifi_ip,     connected && ip && *ip ? ip : "—");
     if (s_lbl_mqtt_status) lv_label_set_text(s_lbl_mqtt_status, mqtt_ok ? "Connected" : "Not Connected");
+}
+
+void settings_page_update_battery(float volts, uint8_t pct, bool charging, bool usb) {
+    if (s_lbl_bat_usb) {
+        if (charging)    lv_label_set_text(s_lbl_bat_usb, "Charging");
+        else if (usb)    lv_label_set_text(s_lbl_bat_usb, "Connected");
+        else             lv_label_set_text(s_lbl_bat_usb, "Not Connected");
+    }
+    if (s_lbl_bat_voltage) {
+        char buf[12];
+        snprintf(buf, sizeof(buf), "%.2f V", volts);
+        lv_label_set_text(s_lbl_bat_voltage, buf);
+    }
+    if (s_lbl_bat_pct) {
+        char buf[8];
+        snprintf(buf, sizeof(buf), "%u%%", pct);
+        lv_label_set_text(s_lbl_bat_pct, buf);
+    }
 }
 
 bool settings_page_update_sensor(const char *topic, const char *value) {
