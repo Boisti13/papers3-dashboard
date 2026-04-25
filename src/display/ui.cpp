@@ -53,7 +53,7 @@ static void build_header(lv_obj_t *scr) {
 
     s_lbl_date = lv_label_create(hdr);
     lv_obj_add_style(s_lbl_date, &g_sty_lbl_md, 0);
-    lv_label_set_text(s_lbl_date, "--.--.----");
+    lv_label_set_text(s_lbl_date, "--. ----");
     lv_obj_align(s_lbl_date, LV_ALIGN_LEFT_MID, PAD, 0);
 
     s_lbl_page_name = lv_label_create(hdr);
@@ -71,8 +71,9 @@ static void build_header(lv_obj_t *scr) {
     lv_obj_align(s_lbl_wifi, LV_ALIGN_RIGHT_MID, -PAD, -12);
 
     s_lbl_battery = lv_label_create(hdr);
-    lv_obj_add_style(s_lbl_battery, &g_sty_lbl_md, 0);
-    lv_label_set_text(s_lbl_battery, "--%");
+    lv_obj_set_style_text_font(s_lbl_battery, &lv_font_mdi_battery_20, 0);
+    lv_obj_set_style_text_color(s_lbl_battery, lv_color_black(), 0);
+    lv_label_set_text(s_lbl_battery, MDI_BAT_0);
     lv_obj_align(s_lbl_battery, LV_ALIGN_RIGHT_MID, -PAD, 12);
 
     s_lbl_sleep = lv_label_create(hdr);
@@ -178,14 +179,31 @@ void ui_update_date(const char *date_str) {
 
 void ui_update_battery(float volts, uint8_t pct, bool charging, bool usb) {
     if (!s_lbl_battery) return;
-    char buf[16];
-    if (charging)
-        snprintf(buf, sizeof(buf), "%u%% CHG", pct);
-    else if (usb)
-        snprintf(buf, sizeof(buf), "%u%% USB", pct);
-    else
-        snprintf(buf, sizeof(buf), "%u%%", pct);
-    lv_label_set_text(s_lbl_battery, buf);
+    if ((charging || usb) && pct >= 100) {
+        lv_label_set_text(s_lbl_battery, MDI_BAT_CHG_FULL);
+        return;
+    }
+    if ((charging || usb) && pct < 100) {
+        const char *icon;
+        if      (pct < 10)  icon = MDI_BAT_CHG_0;
+        else if (pct < 20)  icon = MDI_BAT_CHG_10;
+        else if (pct < 30)  icon = MDI_BAT_CHG_20;
+        else if (pct < 40)  icon = MDI_BAT_CHG_30;
+        else if (pct < 60)  icon = MDI_BAT_CHG_50;
+        else if (pct < 70)  icon = MDI_BAT_CHG_60;
+        else if (pct < 80)  icon = MDI_BAT_CHG_70;
+        else if (pct < 90)  icon = MDI_BAT_CHG_80;
+        else                icon = MDI_BAT_CHG_90;
+        lv_label_set_text(s_lbl_battery, icon);
+    } else {
+        static const char *bat[11] = {
+            MDI_BAT_EMPTY, MDI_BAT_10, MDI_BAT_20, MDI_BAT_30,
+            MDI_BAT_40,    MDI_BAT_50, MDI_BAT_60, MDI_BAT_70,
+            MDI_BAT_80,    MDI_BAT_90, MDI_BAT_0   // 100% → battery-outline (F0079)
+        };
+        uint8_t idx = (pct >= 100) ? 10 : pct / 10;
+        lv_label_set_text(s_lbl_battery, bat[idx]);
+    }
 }
 
 void ui_update_wifi(bool connected, int8_t rssi) {

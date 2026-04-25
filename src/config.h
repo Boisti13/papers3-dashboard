@@ -155,9 +155,6 @@
 
 // ─── Power management ─────────────────────────────────────────────────────────
 #define PIN_PWR_HOLD    44
-#define PIN_CHG_STATE   4
-#define PIN_USB_DET     5
-#define PIN_ADC_BATTERY 3
 
 // ─── Time / NTP ───────────────────────────────────────────────────────────────
 #define NTP_SERVER  "pool.ntp.org"

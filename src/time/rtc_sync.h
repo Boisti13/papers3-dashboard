@@ -1,7 +1,14 @@
 #pragma once
 
 /**
- * Sync ESP32 SNTP from NTP, then write the result into M5Unified's RTC.
+ * Restore system clock from the hardware RTC at boot.
+ * Call once in setup() after M5.begin() — gives correct date immediately
+ * without waiting for WiFi or NTP.
+ */
+void rtc_restore_from_hw();
+
+/**
+ * Sync ESP32 SNTP from NTP, then write the result back to the hardware RTC.
  * Call once after WiFi is confirmed connected.
  * Blocks up to ~10 s waiting for the first SNTP response.
  */

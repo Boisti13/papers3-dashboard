@@ -70,7 +70,10 @@ void setup() {
     }
     Serial.println("\n\n=== PaperS3 Dashboard booting ===");
 
-    // ── 2. LVGL display driver ───────────────────────────────────────────────
+    // ── 2. Restore system clock from hardware RTC ─────────────────────────────
+    rtc_restore_from_hw();
+
+    // ── 3. LVGL display driver ───────────────────────────────────────────────
     draw_boot_message("init display…");
     epd_driver_init();
 
@@ -165,7 +168,7 @@ void loop() {
         }
     }
 
-    // Date — update UI every 60 s (catches midnight rollover)
+    // Date — update UI every 60 s
     static uint32_t last_date_ms = 0;
     if (now - last_date_ms >= 60000 || last_date_ms == 0) {
         last_date_ms = now;
@@ -175,6 +178,7 @@ void loop() {
     // Battery + WiFi status — update UI every 30 s
     static uint32_t last_bat_ms  = 0;
     static int      last_wifi    = -1;  // -1 forces first update
+    static int      last_usb     = -1;  // -1 forces first update
     if (now - last_bat_ms >= 30000 || last_bat_ms == 0) {
         last_bat_ms = now;
         float v   = battery_voltage();
@@ -188,6 +192,7 @@ void loop() {
         ui_update_wifi(connected, rssi);
         settings_page_update_wifi(connected, WIFI_SSID, rssi, ip.c_str(), mqtt_connected());
         last_wifi = connected;
+        last_usb  = usb;
         mqtt_publish_status(p, rssi);
         Serial.printf("[bat] %.2fV  %u%%  %s  rssi=%d\n",
                       v, p, chg ? "CHG" : (usb ? "USB" : "BATT"), rssi);
@@ -196,6 +201,11 @@ void loop() {
     if (wifi_now != last_wifi) {
         last_wifi = wifi_now;
         ui_update_wifi(wifi_now, (int8_t)WiFi.RSSI());
+    }
+    bool usb_now = battery_usb_connected();
+    if ((int)usb_now != last_usb) {
+        last_usb = usb_now;
+        ui_update_battery(battery_voltage(), battery_percent(), battery_charging(), usb_now);
     }
 
     // Yield to background tasks (WiFi stack, watchdog)

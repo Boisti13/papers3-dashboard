@@ -23,10 +23,14 @@
  *              src/fonts/materialdesignicons-webfont.c
  *   5. Also remove the line ".static_bitmap = 0," if it appears near the end.
  *
- * To regenerate lv_font_mdi_20 (WiFi header icons):
+ * To regenerate lv_font_mdi_20 (WiFi + battery header icons):
  *   Same steps but:
  *      Name: lv_font_mdi_20  |  Size: 20  |  Bpp: 4
- *      Range: 985375,985378,985381,985384,985390
+ *      Range (decimal, comma-separated):
+ *      985375,985378,985381,985384,985390,
+ *      983161,983162,983163,983164,983165,983166,983167,983168,983169,983170,983171,
+ *      983172,983173,983174,983175,983176,983177,983178,983179,985244,985245,985246,987341
+ *      (WiFi: 985375–985390; battery non-chg: 983161–983171; battery chg: 983172–983179,985244–985246; empty alert: 987341)
  *   Save as: src/fonts/lv_font_mdi_20.c
  *
  * lv_conf.h must contain:
@@ -39,6 +43,7 @@
 
 LV_FONT_DECLARE(lv_font_mdi_48);
 LV_FONT_DECLARE(lv_font_mdi_20);
+LV_FONT_DECLARE(lv_font_mdi_battery_20);
 
 // ── UTF-8 encoding note ───────────────────────────────────────────────────────
 // All MDI codepoints are in the supplementary PUA (U+F0000–U+FFFFF, plane 15).
@@ -91,6 +96,33 @@ LV_FONT_DECLARE(lv_font_mdi_20);
 #define MDI_WIFI_3             "\xf3\xb0\xa4\xa5"  // U+F0925  mdi:wifi-strength-3
 #define MDI_WIFI_4             "\xf3\xb0\xa4\xa8"  // U+F0928  mdi:wifi-strength-4
 #define MDI_WIFI_OFF           "\xf3\xb0\xa4\xae"  // U+F092E  mdi:wifi-strength-off-outline
+
+// ── Battery — not charging (lv_font_mdi_20) ───────────────────────────────────
+#define MDI_BAT_EMPTY          "\xf3\xb1\x83\x8d"  // U+F10CD  mdi:battery-alert (0 %)
+#define MDI_BAT_0              "\xf3\xb0\x81\xb9"  // U+F0079  mdi:battery-outline (100 %)
+#define MDI_BAT_10             "\xf3\xb0\x81\xba"  // U+F007A  mdi:battery-10
+#define MDI_BAT_20             "\xf3\xb0\x81\xbb"  // U+F007B  mdi:battery-20
+#define MDI_BAT_30             "\xf3\xb0\x81\xbc"  // U+F007C  mdi:battery-30
+#define MDI_BAT_40             "\xf3\xb0\x81\xbd"  // U+F007D  mdi:battery-40
+#define MDI_BAT_50             "\xf3\xb0\x81\xbe"  // U+F007E  mdi:battery-50
+#define MDI_BAT_60             "\xf3\xb0\x81\xbf"  // U+F007F  mdi:battery-60
+#define MDI_BAT_70             "\xf3\xb0\x82\x80"  // U+F0080  mdi:battery-70
+#define MDI_BAT_80             "\xf3\xb0\x82\x81"  // U+F0081  mdi:battery-80
+#define MDI_BAT_90             "\xf3\xb0\x82\x82"  // U+F0082  mdi:battery-90
+#define MDI_BAT_100            "\xf3\xb0\x82\x83"  // U+F0083  mdi:battery
+
+// ── Battery — charging (lv_font_mdi_20) ──────────────────────────────────────
+#define MDI_BAT_CHG_0          "\xf3\xb0\xa2\x9c"  // U+F089C  mdi:battery-charging-outline
+#define MDI_BAT_CHG_10         "\xf3\xb0\x82\x86"  // U+F0086  mdi:battery-charging-10
+#define MDI_BAT_CHG_20         "\xf3\xb0\x82\x87"  // U+F0087  mdi:battery-charging-20
+#define MDI_BAT_CHG_30         "\xf3\xb0\x82\x88"  // U+F0088  mdi:battery-charging-30
+#define MDI_BAT_CHG_50         "\xf3\xb0\xa2\x9d"  // U+F089D  mdi:battery-charging-50
+#define MDI_BAT_CHG_60         "\xf3\xb0\x82\x89"  // U+F0089  mdi:battery-charging-60
+#define MDI_BAT_CHG_70         "\xf3\xb0\xa2\x9e"  // U+F089E  mdi:battery-charging-70
+#define MDI_BAT_CHG_80         "\xf3\xb0\x82\x8a"  // U+F008A  mdi:battery-charging-80
+#define MDI_BAT_CHG_90         "\xf3\xb0\x82\x8b"  // U+F008B  mdi:battery-charging-90
+#define MDI_BAT_CHG_FULL       "\xf3\xb0\x82\x84"  // U+F0084  mdi:battery-charging-outline (100% on USB)
+#define MDI_BAT_CHG_100        "\xf3\xb0\x82\x85"  // U+F0085  mdi:battery-charging
 
 // ── ThinkLab ──────────────────────────────────────────────────────────────────
 #define MDI_CPU_64_BIT         "\xf3\xb0\xbb\xa0"  // U+F0EE0  mdi:cpu-64-bit
