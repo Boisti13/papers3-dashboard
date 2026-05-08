@@ -19,11 +19,11 @@
 #include <lvgl.h>
 
 // ─── Draw buffer ──────────────────────────────────────────────────────────────
-static const size_t DRAW_BUF_LINES  = EPD_HEIGHT / 10;
-static const size_t DRAW_BUF_PIXELS = EPD_WIDTH * DRAW_BUF_LINES;
+// Full-screen single buffer — LVGL renders the whole frame in one pass,
+// avoiding the visible top-to-bottom band artifact from partial flushes.
+static const size_t DRAW_BUF_PIXELS = EPD_WIDTH * EPD_HEIGHT;
 
 static lv_color_t *draw_buf_1 = nullptr;
-static lv_color_t *draw_buf_2 = nullptr;
 
 // ─── Refresh state ────────────────────────────────────────────────────────────
 // Minimum ms between physical panel commits.
@@ -57,8 +57,7 @@ void epd_driver_init() {
                   M5.Display.width(), M5.Display.height());
 
     draw_buf_1 = (lv_color_t *)ps_malloc(DRAW_BUF_PIXELS * sizeof(lv_color_t));
-    draw_buf_2 = (lv_color_t *)ps_malloc(DRAW_BUF_PIXELS * sizeof(lv_color_t));
-    if (!draw_buf_1 || !draw_buf_2) {
+    if (!draw_buf_1) {
         Serial.println("[EPD] FATAL: PSRAM alloc failed");
         return;
     }
@@ -67,7 +66,7 @@ void epd_driver_init() {
     lv_log_register_print_cb(lv_log_cb);
 
     static lv_disp_draw_buf_t draw_buf_dsc;
-    lv_disp_draw_buf_init(&draw_buf_dsc, draw_buf_1, draw_buf_2, DRAW_BUF_PIXELS);
+    lv_disp_draw_buf_init(&draw_buf_dsc, draw_buf_1, nullptr, DRAW_BUF_PIXELS);
 
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
