@@ -50,7 +50,7 @@ void navigate_to(lv_obj_t *page, const char *name) {
             lv_obj_add_flag(s_btn_back, LV_OBJ_FLAG_HIDDEN);
     }
     lv_refr_now(lv_disp_get_default());
-    epd_driver_full_refresh();
+    epd_driver_fast_refresh();
 }
 
 void navigate_back() {
@@ -64,7 +64,7 @@ void navigate_back() {
     if (s_btn_back && s_nav_depth == 0)
         lv_obj_add_flag(s_btn_back, LV_OBJ_FLAG_HIDDEN);
     lv_refr_now(lv_disp_get_default());
-    epd_driver_full_refresh();
+    epd_driver_fast_refresh();
 }
 
 void navigate_home() {
@@ -77,7 +77,7 @@ void navigate_home() {
     if (s_lbl_page_name) lv_label_set_text(s_lbl_page_name, "Home");
     if (s_btn_back) lv_obj_add_flag(s_btn_back, LV_OBJ_FLAG_HIDDEN);
     lv_refr_now(lv_disp_get_default());
-    epd_driver_full_refresh();
+    epd_driver_fast_refresh();
 }
 
 // ── Page factory ──────────────────────────────────────────────────────────────

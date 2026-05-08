@@ -127,6 +127,7 @@ void loop() {
     bool touched = M5.Touch.getCount() > 0;
     if (touched && !s_was_touched) {
         sleep_feed();
+        epd_driver_request_immediate();
     }
     s_was_touched = touched;
 
