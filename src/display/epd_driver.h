@@ -18,3 +18,6 @@ void epd_driver_full_refresh();
 
 /** Force an immediate fast panel refresh (ignores rate limiter). */
 void epd_driver_fast_refresh();
+
+/** Allow the next epd_driver_tick() to fire immediately, bypassing the rate limit. */
+void epd_driver_request_immediate();

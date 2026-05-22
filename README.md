@@ -16,6 +16,8 @@ A touch-enabled home automation dashboard for the **M5Stack PaperS3** (SKU C139)
 - LVGL 8.3 UI allocated entirely in 8 MB PSRAM
 - Non-blocking boot — home screen appears immediately, WiFi connects in background
 - Live WiFi signal strength indicator (4-bar RSSI) in header
+- MDI battery icon in header — level, charging state, and USB-full indicator
+- Hardware RTC preserves date/time across power-off; syncs via NTP on connect
 
 ---
 

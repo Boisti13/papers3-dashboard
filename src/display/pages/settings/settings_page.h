@@ -10,6 +10,9 @@ lv_obj_t *get_page_settings();
 /** Update WiFi info card. Call from main loop whenever WiFi state changes. */
 void settings_page_update_wifi(bool connected, const char *ssid, int8_t rssi, const char *ip, bool mqtt_ok);
 
+/** Update Battery info card. Call from main loop with current battery state. */
+void settings_page_update_battery(float volts, uint8_t pct, bool charging, bool usb);
+
 /** Placeholder — always returns false. */
 bool settings_page_update_sensor(const char *topic, const char *value);
 bool settings_page_update_switch(const char *topic, bool on);
