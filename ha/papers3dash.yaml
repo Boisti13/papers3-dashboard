@@ -78,7 +78,12 @@ automation:
   # ── Push slow-changing sensors on PaperS3 connect ────────────────────────────
   # Disk usage rarely changes so statestream never republishes on reconnect.
   # Fires when the PaperS3 connects to MQTT and immediately pushes current values.
-  - alias: "PaperS3 push disk sensors on connect"
+  - id: papers3_push_disk_sensors_on_connect
+    alias: "PaperS3 – Push disk sensors on connect"
+    description: >-
+      When the PaperS3 reports online on papers3dash/availability, publish the
+      current ThinkLab disk usage so the ThinkLab page is filled at once
+      (statestream only publishes on change).
     trigger:
       - platform: mqtt
         topic: "papers3dash/availability"
@@ -104,7 +109,12 @@ automation:
                 retain: false
 
   # ── Push bedroom light states on PaperS3 connect ────────────────────────────
-  - alias: "PaperS3 push bedroom lights on connect"
+  - id: papers3_push_bedroom_lights_on_connect
+    alias: "PaperS3 – Push bedroom lights on connect"
+    description: >-
+      When the PaperS3 reports online on papers3dash/availability, publish the
+      current state of the bedroom RGB strip and bulb so their tiles are right
+      straight away.
     trigger:
       - platform: mqtt
         topic: "papers3dash/availability"
@@ -124,7 +134,12 @@ automation:
                 retain: false
 
   # ── Heating: set temperature ────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT climate set temperature"
+  - id: papers3_climate_set_temperature
+    alias: "PaperS3 – Set radiator temperature"
+    description: >-
+      Sets a climate entity's target temperature from
+      homeassistant/climate/<entity>/set_temperature (older topic; the heating
+      page now uses paperdash/climate/…).
     trigger:
       - platform: mqtt
         topic: "homeassistant/climate/+/set_temperature"
@@ -136,7 +151,12 @@ automation:
           temperature: "{{ trigger.payload | float }}"
 
   # ── Heating: set preset mode ─────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT climate set preset"
+  - id: papers3_climate_set_preset
+    alias: "PaperS3 – Set radiator preset"
+    description: >-
+      Sets a climate entity's preset from
+      homeassistant/climate/<entity>/set_preset_mode (older topic; the heating
+      page now uses paperdash/climate/…).
     trigger:
       - platform: mqtt
         topic: "homeassistant/climate/+/set_preset_mode"
@@ -148,7 +168,11 @@ automation:
           preset_mode: "{{ trigger.payload }}"
 
   # ── Switches ─────────────────────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT switch set"
+  - id: papers3_switch_set
+    alias: "PaperS3 – Switch a switch"
+    description: >-
+      Turns switch.<entity> on or off (payload ON/OFF) from
+      homeassistant/switch/<entity>/set: sockets, TV, ThinkLab containers.
     trigger:
       - platform: mqtt
         topic: "homeassistant/switch/+/set"
@@ -158,7 +182,11 @@ automation:
           entity_id: "switch.{{ trigger.topic.split('/')[2] }}"
 
   # ── Lights ───────────────────────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT light set"
+  - id: papers3_light_set
+    alias: "PaperS3 – Switch a light"
+    description: >-
+      Turns light.<entity> on or off (payload ON/OFF) from
+      homeassistant/light/<entity>/set.
     trigger:
       - platform: mqtt
         topic: "homeassistant/light/+/set"
@@ -168,7 +196,11 @@ automation:
           entity_id: "light.{{ trigger.topic.split('/')[2] }}"
 
   # ── Remotes (TV, Shield) ─────────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT remote set"
+  - id: papers3_remote_set
+    alias: "PaperS3 – Switch a remote"
+    description: >-
+      Turns remote.<entity> (TV, Shield) on or off (payload ON/OFF) from
+      homeassistant/remote/<entity>/set.
     trigger:
       - platform: mqtt
         topic: "homeassistant/remote/+/set"
@@ -178,7 +210,11 @@ automation:
           entity_id: "remote.{{ trigger.topic.split('/')[2] }}"
 
   # ── Vacuum room input_booleans ────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT input_boolean set"
+  - id: papers3_vacuum_room_set
+    alias: "PaperS3 – Select vacuum room"
+    description: >-
+      Turns a vacuum room helper input_boolean.<entity> on or off (payload
+      ON/OFF) from homeassistant/input_boolean/<entity>/set.
     trigger:
       - platform: mqtt
         topic: "homeassistant/input_boolean/+/set"
@@ -188,7 +224,11 @@ automation:
           entity_id: "input_boolean.{{ trigger.topic.split('/')[2] }}"
 
   # ── Vacuum repeat input_select ────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT vacuum repeat set"
+  - id: papers3_vacuum_repeat_set
+    alias: "PaperS3 – Set vacuum repeat"
+    description: >-
+      Sets input_select.vacuum_repeat to the payload from
+      homeassistant/input_select/vacuum_repeat/set.
     trigger:
       - platform: mqtt
         topic: "homeassistant/input_select/vacuum_repeat/set"
@@ -200,7 +240,9 @@ automation:
           option: "{{ trigger.payload }}"
 
   # ── Vacuum: start all rooms ───────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT vacuum start all"
+  - id: papers3_vacuum_start_all
+    alias: "PaperS3 – Start vacuum, all rooms"
+    description: Starts the Roborock on all rooms when the PaperS3 asks.
     trigger:
       - platform: mqtt
         topic: "homeassistant/vacuum/roborock_s6_maxv/start"
@@ -210,7 +252,9 @@ automation:
           entity_id: vacuum.roborock_s6_maxv
 
   # ── Vacuum: pause ─────────────────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT vacuum pause"
+  - id: papers3_vacuum_pause
+    alias: "PaperS3 – Pause vacuum"
+    description: Pauses the Roborock when the PaperS3 asks.
     trigger:
       - platform: mqtt
         topic: "homeassistant/vacuum/roborock_s6_maxv/pause"
@@ -220,7 +264,9 @@ automation:
           entity_id: vacuum.roborock_s6_maxv
 
   # ── Vacuum: dock ──────────────────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT vacuum dock"
+  - id: papers3_vacuum_dock
+    alias: "PaperS3 – Send vacuum to dock"
+    description: Sends the Roborock back to its dock when the PaperS3 asks.
     trigger:
       - platform: mqtt
         topic: "homeassistant/vacuum/roborock_s6_maxv/dock"
@@ -230,7 +276,11 @@ automation:
           entity_id: vacuum.roborock_s6_maxv
 
   # ── Vacuum: start selected rooms ──────────────────────────────────────────────
-  - alias: "PaperS3 MQTT vacuum start selected rooms"
+  - id: papers3_vacuum_start_selected_rooms
+    alias: "PaperS3 – Start vacuum, selected rooms"
+    description: >-
+      Runs script.vacuum_clean_selected_rooms (the rooms ticked in the
+      vac_room_* helpers) when the PaperS3 asks.
     trigger:
       - platform: mqtt
         topic: "homeassistant/script/vacuum_clean_selected_rooms/set"
@@ -238,15 +288,21 @@ automation:
       - service: script.vacuum_clean_selected_rooms
 
   # ── Vacuum: go to trashcan ────────────────────────────────────────────────────
-  - alias: "PaperS3 MQTT vacuum go to trashcan"
+  - id: papers3_vacuum_go_to_trashcan
+    alias: "PaperS3 – Send vacuum to trashcan"
+    description: Runs script.roborock_go_to_trashcan when the PaperS3 asks.
     trigger:
       - platform: mqtt
         topic: "homeassistant/script/roborock_go_to_trashcan/set"
     action:
       - service: script.roborock_go_to_trashcan
 
-  # ── Heating: set HVAC mode (Versatile Thermostat) ────────────────────────────
-  - alias: PaperDash Set HVAC Mode
+  # ── Heating page (Versatile Thermostat): paperdash/climate/… topics ──────────
+  - id: papers3_heating_set_hvac_mode
+    alias: "PaperS3 – Heating page sets HVAC mode"
+    description: >-
+      Sets a radiator's HVAC mode (heat/off) from
+      paperdash/climate/<entity>/set_hvac_mode, sent by the heating page.
     mode: parallel
     trigger:
       - platform: mqtt
@@ -258,7 +314,11 @@ automation:
         data:
           hvac_mode: "{{ trigger.payload }}"
 
-  - alias: PaperDash Set Preset Mode
+  - id: papers3_heating_set_preset
+    alias: "PaperS3 – Heating page sets preset"
+    description: >-
+      Sets a radiator's preset from paperdash/climate/<entity>/set_preset_mode,
+      sent by the heating page.
     mode: parallel
     trigger:
       - platform: mqtt
@@ -270,7 +330,11 @@ automation:
         data:
           preset_mode: "{{ trigger.payload }}"
 
-  - alias: PaperDash Set Temperature
+  - id: papers3_heating_set_temperature
+    alias: "PaperS3 – Heating page sets temperature"
+    description: >-
+      Sets a radiator's target temperature from
+      paperdash/climate/<entity>/set_temperature, sent by the heating page.
     mode: parallel
     trigger:
       - platform: mqtt

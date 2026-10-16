@@ -145,11 +145,15 @@ connect, for older versions of the package.
 
 | Automation | Listens on | Does |
 |---|---|---|
-| *PaperS3 push disk sensors on connect* | `papers3dash/availability` = `online` | republishes the ThinkLab disk sensors |
-| *PaperS3 push bedroom lights on connect* | same | republishes the two bedroom lights |
-| *PaperS3 MQTT climate set temperature / set preset*, *PaperDash Set HVAC Mode / Preset Mode / Temperature* | `homeassistant/climate/<id>/…` | `climate.set_*` |
-| *PaperS3 MQTT switch / light / remote / input_boolean set* | `homeassistant/<domain>/<id>/set` | `turn_on` / `turn_off` |
-| *PaperS3 MQTT vacuum …* | `homeassistant/vacuum/roborock_s6_maxv/…`, `…/script/…/set` | start, pause, dock, repeat, clean selected rooms, go to trash can |
+| *PaperS3 – Push disk sensors on connect* | `papers3dash/availability` = `online` | republishes the ThinkLab disk sensors |
+| *PaperS3 – Push bedroom lights on connect* | same | republishes the two bedroom lights |
+| *PaperS3 – Heating page sets HVAC mode / preset / temperature* | `paperdash/climate/<id>/…` | `climate.set_*` (what the heating page sends) |
+| *PaperS3 – Set radiator temperature / preset* | `homeassistant/climate/<id>/…` | `climate.set_*` (older topics) |
+| *PaperS3 – Switch a switch / light / remote*, *Select vacuum room* | `homeassistant/<domain>/<id>/set` | `turn_on` / `turn_off` |
+| *PaperS3 – Start vacuum, Pause vacuum, Send vacuum to dock / trashcan, Set vacuum repeat* | `homeassistant/vacuum/roborock_s6_maxv/…`, `…/script/…/set`, `…/input_select/vacuum_repeat/set` | start, pause, dock, repeat, clean selected rooms, go to trash can |
+
+Each automation has an `id` (`papers3_…`), so it can be edited and traced in
+Home Assistant.
 
 ## Hardware
 
