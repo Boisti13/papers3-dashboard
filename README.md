@@ -14,11 +14,13 @@ home server's containers. The firmware is plain Arduino/C++ with an
 [LVGL](https://lvgl.io/) interface, talks to Home Assistant over MQTT, and
 goes to sleep when nobody touches it — the e-paper keeps the last page.
 
-![M5Stack PaperS3](https://static-cdn.m5stack.com/resource/docs/products/core/M5Paper_S3/img-m5papers3-01.webp)
+<p align="center"><img src="docs/screenshots/home.png" alt="Home page" width="250">&nbsp;&nbsp;<img src="docs/screenshots/heating-room.png" alt="Heating, living room" width="250">&nbsp;&nbsp;<img src="docs/screenshots/switches.png" alt="Switches page" width="250"></p>
+
+<p align="center"><sub>Rendered from the firmware's own UI code with sample values, in the panel's 16 grey levels (see <a href="#screenshots">Screenshots</a>).</sub></p>
 
 ## Highlights
 
-- **Eight touch pages** — Heating, Switches, Cleaning, Climate, ThinkLab, Arthur, Bedroom and Settings — from a grid launcher on the home page
+- **Eight touch pages** — Heating, Switches, Cleaning, Climate, ThinkLab, Arthur (a placeholder for now), Bedroom and Settings — from a grid launcher on the home page
 - **Two-way with Home Assistant over MQTT**: values come in through `mqtt_statestream`, taps go out as MQTT commands that a [Home Assistant package](ha/papers3dash.yaml) turns into actions
 - **Instant start**: the home page appears at once, Wi-Fi connects in the background and reconnects on its own (forced retry after 30 s)
 - **Header at a glance**: date, 4-bar Wi-Fi signal and an MDI battery icon (level, charging, USB full)
@@ -34,14 +36,31 @@ goes to sleep when nobody touches it — the e-paper keeps the last page.
 | Page | What it shows and does |
 |---|---|
 | **Home** | grid launcher for all other pages |
-| **Heating** | one card per room (bathroom, kitchen, bedroom, living room, Arthur): room temperature and humidity, target temperature, heating or idle, preset, window open; set temperature, preset and mode |
+| **Heating** | a tile per room (bathroom, kitchen, bedroom, living room, Arthur); each opens the room's page: target temperature with − / +, heating or idle, window open or closed, room temperature and humidity, preset (frost, eco, comfort, boost) and heating on/off |
 | **Switches** | 2×4 grid: TV, TV socket, Shield, living room and kitchen lights, Arthur's socket (two tiles free) |
 | **Cleaning** | Roborock S6 MaxV: pick rooms, repeat count, clean selected rooms or everything, pause, dock, go to the trash can |
 | **Climate** | outdoor temperature and humidity, CO₂, PM2.5 |
 | **ThinkLab** | Proxmox server: CPU, five disks' usage, start/stop for its LXCs and the Home Assistant VM |
-| **Arthur** | child's room controls |
+| **Arthur** | placeholder (*coming soon*) |
 | **Bedroom** | RGB strip and RGB bulb on/off |
-| **Settings** | Wi-Fi/MQTT, battery, sleep times, OTA |
+| **Settings** | sleep times, OTA, Wi-Fi/MQTT with a *Reconnect* button, battery |
+
+<table>
+<tr>
+<td align="center"><img src="docs/screenshots/home.png" width="160"><br><sub>Home</sub></td>
+<td align="center"><img src="docs/screenshots/heating.png" width="160"><br><sub>Heating</sub></td>
+<td align="center"><img src="docs/screenshots/heating-room.png" width="160"><br><sub>Heating → Living Room</sub></td>
+<td align="center"><img src="docs/screenshots/switches.png" width="160"><br><sub>Switches</sub></td>
+<td align="center"><img src="docs/screenshots/cleaning.png" width="160"><br><sub>Cleaning</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screenshots/climate.png" width="160"><br><sub>Climate</sub></td>
+<td align="center"><img src="docs/screenshots/thinklab.png" width="160"><br><sub>ThinkLab</sub></td>
+<td align="center"><img src="docs/screenshots/bedroom.png" width="160"><br><sub>Bedroom</sub></td>
+<td align="center"><img src="docs/screenshots/arthur.png" width="160"><br><sub>Arthur</sub></td>
+<td align="center"><img src="docs/screenshots/settings.png" width="160"><br><sub>Settings</sub></td>
+</tr>
+</table>
 
 ## How it works
 
@@ -197,6 +216,8 @@ src/
 ha/
   papers3dash.yaml         # Home Assistant package
 ota_upload.sh              # build and upload over Wi-Fi
+docs/screenshots/          # rendered pages for this README
+tools/render/              # renders them on a Linux PC (no device needed)
 ```
 
 ## Development
@@ -209,6 +230,21 @@ flashing:
 ```bash
 pio run
 ```
+
+### Screenshots
+
+The pictures in this README are not photos: [`tools/render/`](tools/render)
+builds the real page code (`src/display/`) on a Linux PC against small stubs
+for Wi-Fi, MQTT, OTA and sleep, fills in sample values, and writes every page
+as a 540×960 PNG in the panel's 16 grey levels. After a UI change, render
+them again (needs gcc, g++ and zlib; LVGL 8.3 as PlatformIO uses it):
+
+```bash
+git clone --depth 1 -b v8.3.11 https://github.com/lvgl/lvgl /tmp/lvgl
+bash tools/render/build.sh "$PWD" /tmp/lvgl docs/screenshots
+```
+
+The sample values are in `sample_values()` in `tools/render/render.cpp`.
 
 ## License
 
