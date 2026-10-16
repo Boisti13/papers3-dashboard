@@ -1,63 +1,73 @@
 # PaperS3 Dashboard
 
-A touch-enabled home automation dashboard for the **M5Stack PaperS3** (SKU C139) e-paper display, built with LVGL and integrated with Home Assistant via MQTT.
+[![Latest tag](https://img.shields.io/github/v/tag/Boisti13/papers3-dashboard?label=version)](https://github.com/Boisti13/papers3-dashboard/tags)
+[![PlatformIO](https://img.shields.io/badge/PlatformIO-ESP32--S3-F5822A?logo=platformio&logoColor=white)](platformio.ini)
+[![LVGL](https://img.shields.io/badge/LVGL-8.3-343839)](https://lvgl.io/)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-MQTT-41BDF5?logo=homeassistant&logoColor=white)](ha/papers3dash.yaml)
+[![License: MIT](https://img.shields.io/github/license/Boisti13/papers3-dashboard)](LICENSE)
+
+Turn the **M5Stack PaperS3** (SKU C139, ESP32-S3, 4.7" 540×960 e-paper with
+touch) into a wall or table remote for [Home Assistant](https://www.home-assistant.io/).
+Tap through eight pages: set the radiators, switch the TV and lights, send the
+robot vacuum to chosen rooms, look at the air quality, start and stop the
+home server's containers. The firmware is plain Arduino/C++ with an
+[LVGL](https://lvgl.io/) interface, talks to Home Assistant over MQTT, and
+goes to sleep when nobody touches it — the e-paper keeps the last page.
 
 ![M5Stack PaperS3](https://static-cdn.m5stack.com/resource/docs/products/core/M5Paper_S3/img-m5papers3-01.webp)
 
----
+## Highlights
 
-## Features
-
-- 540×960 e-paper display driven by [epdiy](https://github.com/vroland/epdiy) via M5Unified
-- Touch navigation (GT911) across 8 dashboard pages
-- Full MQTT integration with Home Assistant via `mqtt_statestream`
-- Browser-based OTA firmware updates (no cable needed)
-- Light sleep with touch wake — battery friendly
-- LVGL 8.3 UI allocated entirely in 8 MB PSRAM
-- Non-blocking boot — home screen appears immediately, WiFi connects in background
-- Live WiFi signal strength indicator (4-bar RSSI) in header
-- MDI battery icon in header — level, charging state, and USB-full indicator
-- Hardware RTC preserves date/time across power-off; syncs via NTP on connect
-
----
+- **Eight touch pages** — Heating, Switches, Cleaning, Climate, ThinkLab, Arthur, Bedroom and Settings — from a grid launcher on the home page
+- **Two-way with Home Assistant over MQTT**: values come in through `mqtt_statestream`, taps go out as MQTT commands that a [Home Assistant package](ha/papers3dash.yaml) turns into actions
+- **Instant start**: the home page appears at once, Wi-Fi connects in the background and reconnects on its own (forced retry after 30 s)
+- **Header at a glance**: date, 4-bar Wi-Fi signal and an MDI battery icon (level, charging, USB full)
+- **E-paper refresh tuned for touch**: a tap redraws at once, page changes use the fast mode, every fifth refresh is a full-quality pass that clears ghosting
+- **Two-stage sleep**: light sleep after a minute without touch (a tap wakes it and still counts as a tap), then power-off with a standby screen after 5 minutes; both times adjustable on the Settings page and kept across restarts
+- **Keeps the time without Wi-Fi**: the hardware RTC holds date and time through power-off; NTP sets it again on every connect
+- **Settings page**: Wi-Fi (SSID, signal in dBm with a quality label, IP) and MQTT status, battery voltage and USB state, sleep times, OTA
+- **Over-the-air updates from the browser**: start OTA on the Settings page, open the device's address, upload the `.bin`
+- **Shows up in Home Assistant** by MQTT discovery as *PaperS3 Dashboard* with battery and Wi-Fi signal
 
 ## Pages
 
-| Page | Description |
+| Page | What it shows and does |
 |---|---|
-| **Home** | Grid launcher for all pages |
-| **Heating** | Per-room radiator control — temperature, preset, window state |
-| **Switches** | TV, Shield, living/kitchen lights, sockets |
-| **Cleaning** | Roborock S6 MaxV — room selection, repeat, start/pause/dock |
-| **Climate** | Outdoor temp/humidity, CO₂, PM2.5 |
-| **ThinkLab** | Proxmox server — CPU, disk usage, LXC/VM start/stop |
-| **Arthur** | Child's room controls |
-| **Bedroom** | Bedroom RGB strip and bulb |
+| **Home** | grid launcher for all other pages |
+| **Heating** | one card per room (bathroom, kitchen, bedroom, living room, Arthur): room temperature and humidity, target temperature, heating or idle, preset, window open; set temperature, preset and mode |
+| **Switches** | 2×4 grid: TV, TV socket, Shield, living room and kitchen lights, Arthur's socket (two tiles free) |
+| **Cleaning** | Roborock S6 MaxV: pick rooms, repeat count, clean selected rooms or everything, pause, dock, go to the trash can |
+| **Climate** | outdoor temperature and humidity, CO₂, PM2.5 |
+| **ThinkLab** | Proxmox server: CPU, five disks' usage, start/stop for its LXCs and the Home Assistant VM |
+| **Arthur** | child's room controls |
+| **Bedroom** | RGB strip and RGB bulb on/off |
+| **Settings** | Wi-Fi/MQTT, battery, sleep times, OTA |
 
----
+## How it works
 
-## Hardware
+```
+Home Assistant                                       PaperS3 (this firmware)
+mqtt_statestream ── homeassistant/<domain>/<id>/… ─▶  updates the page values
+                                                      (subscribed to every topic in config.h)
 
-- **M5Stack PaperS3** (ESP32-S3, 16 MB flash, 8 MB PSRAM, 540×960 e-paper)
-- Power via USB-C or internal LiPo battery
+packages/papers3dash.yaml ◀── homeassistant/<domain>/<id>/set ──  a tap on a tile / button
+  automations: call the service                       (climate, switch, light, remote, vacuum …)
 
----
+  "push on connect"       ◀── papers3dash/availability = online ─  device (re)connects
+  republishes slow values ─▶ (disk usage, bedroom lights)
+```
 
-## Software Stack
+`mqtt_statestream` only publishes when a state changes, so values that rarely
+change (disk usage, the bedroom lights) are pushed again by the package each
+time the PaperS3 comes online.
 
-| Component | Version |
-|---|---|
-| PlatformIO / Arduino | espressif32 |
-| M5Unified | ^0.2.5 |
-| LVGL | ^8.3.0 |
-| PubSubClient | ^2.8.0 |
-| ArduinoJson | ^7.0.0 |
+## Install
 
----
+You need Home Assistant with an MQTT broker (e.g. the Mosquitto add-on),
+[PlatformIO](https://platformio.org/) (VS Code extension or CLI), a PaperS3
+and a USB-C cable.
 
-## Setup
-
-### 1. Clone and configure credentials
+**1. Credentials.** Copy the template and fill in Wi-Fi and the MQTT broker:
 
 ```bash
 git clone https://github.com/Boisti13/papers3-dashboard.git
@@ -65,178 +75,137 @@ cd papers3-dashboard
 cp src/secrets.h.template src/secrets.h
 ```
 
-Edit `src/secrets.h` and fill in your WiFi and MQTT broker credentials:
-
 ```cpp
 #define SECRET_WIFI_SSID     "your-ssid"
 #define SECRET_WIFI_PASSWORD "your-password"
-
-#define SECRET_MQTT_HOST "192.168.x.x"
-#define SECRET_MQTT_USER "mqtt-user"
-#define SECRET_MQTT_PASS "mqtt-password"
+#define SECRET_MQTT_HOST     "192.168.x.x"
+#define SECRET_MQTT_USER     "mqtt-user"
+#define SECRET_MQTT_PASS     "mqtt-password"
 ```
 
-> `src/secrets.h` is gitignored and will never be committed.
+`src/secrets.h` is gitignored.
 
-### 2. Adjust topic names
+**2. Your entities.** Every MQTT topic is in [`src/config.h`](src/config.h),
+named after Home Assistant entity IDs (`homeassistant/<domain>/<entity_id>/…`).
+Change them to your own entities. The time zone (`TIMEZONE`, POSIX format)
+is there too.
 
-All MQTT topic mappings live in [src/config.h](src/config.h). The topics follow Home Assistant's `mqtt_statestream` naming convention (`homeassistant/<domain>/<entity_id>/state`). Update the entity IDs to match your own HA instance.
+**3. Home Assistant.** Turn on packages once in `configuration.yaml`, if you
+haven't already:
 
-### 3. Build and flash
+```yaml
+homeassistant:
+  packages: !include_dir_named packages
+```
 
-Open the project in PlatformIO (VS Code extension or CLI) and upload:
+Then add two files to `/config/packages/`:
+
+| File | What it is |
+|---|---|
+| `papers3dash.yaml` | copy of [`ha/papers3dash.yaml`](ha/papers3dash.yaml): the automations that act on the PaperS3's commands, and the push-on-connect |
+| `mqtt_statestream.yaml` | your own file with `mqtt_statestream:` (`base_topic: homeassistant`, `publish_attributes: true`) and every entity used in `config.h` under `include: entities:` — the list is in the comment at the top of `ha/papers3dash.yaml` |
+
+Check the configuration and **restart** Home Assistant — `mqtt_statestream`
+is only read at start; the automations alone would reload with *All YAML
+configuration*.
+
+**4. Build and flash** over USB:
 
 ```bash
 pio run --target upload
 ```
 
----
+The PaperS3 appears in Home Assistant under *Settings → Devices & services →
+MQTT* as **PaperS3 Dashboard**.
 
-## Home Assistant Integration
+## Updates over Wi-Fi
 
-The dashboard uses two mechanisms to communicate with Home Assistant:
-
-### State: `mqtt_statestream`
-
-HA pushes entity state changes to MQTT automatically. Add this to your `configuration.yaml`:
-
-```yaml
-mqtt_statestream:
-  base_topic: homeassistant
-  publish_attributes: true
-  include:
-    entities:
-      - sensor.bathroom_temperature
-      - sensor.bathroom_humidity
-      - climate.bathroom_radiator
-      - binary_sensor.bathroom_window_contact
-      - sensor.kitchen_temperature
-      - sensor.kitchen_humidity
-      - climate.kitchen_radiator
-      - binary_sensor.kitchen_window_contact
-      - sensor.bedroom_temperature
-      - sensor.bedroom_humidity
-      - climate.bedroom_radiator
-      - binary_sensor.bedroom_window_contact
-      - sensor.living_room_temperature
-      - sensor.living_room_humidity
-      - climate.living_room_radiator
-      - binary_sensor.balcony_door_contact
-      - sensor.childs_room_temperature
-      - sensor.childs_room_humidity
-      - climate.arthur_radiator
-      - binary_sensor.arthur_window_contact
-      - remote.samsung_7_series_50
-      - switch.tv_thinklab_l2
-      - remote.shield
-      - light.living_led
-      - light.kitchen_main_led
-      - switch.arthur_socket
-      - input_boolean.vac_room_bad
-      - input_boolean.vac_room_flur
-      - input_boolean.vac_room_schlafzimmer
-      - input_boolean.vac_room_wohnzimmer
-      - input_boolean.vac_room_kinderzimmer
-      - input_boolean.vac_room_kuche
-      - input_select.vacuum_repeat
-      - sensor.outdoor_2_temperature
-      - sensor.outdoor_2_humidity
-      - sensor.indoor_carbon_dioxide
-      - sensor.airquality_1_pm25
-      - sensor.thinklab_cpu_usage
-      - sensor.thinklab_mount_mntssd256gb25
-      - sensor.thinklab_mount_mntdisk500gb25
-      - sensor.thinklab_mount_mntdisk5tb25
-      - sensor.thinklab_mount_mntdisk2tb35
-      - sensor.thinklab_mount_mntdisk8tb35
-      - switch.lxc_audiobookshelf_102
-      - switch.lxc_jellyfin_101
-      - switch.lxc_pihole_103
-      - switch.lxc_smb_share_106
-      - switch.lxc_zerotier_one_105
-      - switch.lxc_sprout_track_108
-      - switch.vm_haos16_1_100
-      - light.bedroom_rgb_strip
-      - light.bedroom_rgb_bulb
-```
-
-### Commands: HA Package
-
-The dashboard publishes MQTT commands when the user interacts with the UI (e.g. toggling a switch, adjusting a thermostat). HA needs automations to act on these.
-
-Install the included HA package by copying [ha/papers3dash.yaml](ha/papers3dash.yaml) to your HA config:
-
-```
-config/packages/papers3dash.yaml
-```
-
-Then reference it in `configuration.yaml`:
-
-```yaml
-homeassistant:
-  packages:
-    papers3dash: !include packages/papers3dash.yaml
-```
-
-The package includes automations for:
-- Climate set temperature / preset mode
-- Switch, light, and remote on/off
-- Roborock vacuum — room selection, start, pause, dock
-- Disk sensor push on device reconnect (since statestream only publishes on change)
-
----
-
-## OTA Updates
-
-The dashboard includes a browser-based OTA server. From the Settings page on the device, activate OTA mode. Then navigate to the device's IP address in a browser, upload a `.bin` file built with PlatformIO, and the device reboots automatically.
-
-A helper script is also included:
+On the Settings page, tap **OTA**: the device stays awake and shows its
+address. Open that address in a browser, choose `.pio/build/PaperS3/firmware.bin`
+and upload — it reboots into the new firmware. Or build and upload in one go:
 
 ```bash
-./ota_upload.sh <device-ip> <firmware.bin>
+./ota_upload.sh <device-ip>
 ```
 
----
+## Home Assistant entities
 
-## Device Telemetry
+**From the device** (MQTT discovery):
 
-The dashboard publishes its own state to MQTT for monitoring in HA:
+| Entity | State | MQTT topic |
+|---|---|---|
+| *PaperS3 Dashboard Battery* | battery, % | `papers3dash/sensor/battery/state` |
+| *PaperS3 Dashboard WiFi RSSI* | Wi-Fi signal, dBm (diagnostic) | `papers3dash/sensor/wifi_rssi/state` |
+| availability | `online` / `offline` (retained, last will) | `papers3dash/availability` |
 
-| Topic | Content |
+The device also sends `online` (not retained) to `paperdash/status` on every
+connect, for older versions of the package.
+
+**From the package** — automations only, no entities of their own:
+
+| Automation | Listens on | Does |
+|---|---|---|
+| *PaperS3 push disk sensors on connect* | `papers3dash/availability` = `online` | republishes the ThinkLab disk sensors |
+| *PaperS3 push bedroom lights on connect* | same | republishes the two bedroom lights |
+| *PaperS3 MQTT climate set temperature / set preset*, *PaperDash Set HVAC Mode / Preset Mode / Temperature* | `homeassistant/climate/<id>/…` | `climate.set_*` |
+| *PaperS3 MQTT switch / light / remote / input_boolean set* | `homeassistant/<domain>/<id>/set` | `turn_on` / `turn_off` |
+| *PaperS3 MQTT vacuum …* | `homeassistant/vacuum/roborock_s6_maxv/…`, `…/script/…/set` | start, pause, dock, repeat, clean selected rooms, go to trash can |
+
+## Hardware
+
+| | |
 |---|---|
-| `papers3dash/availability` | `online` / `offline` |
-| `papers3dash/sensor/battery/state` | Battery percentage |
-| `papers3dash/sensor/wifi_rssi/state` | WiFi signal strength (dBm) |
+| Board | M5Stack PaperS3 (SKU C139) |
+| SoC | ESP32-S3, 16 MB flash, 8 MB octal PSRAM (LVGL's memory and a full-screen draw buffer live there) |
+| Display | 4.7" 540×960 e-paper, 16 grey levels, driven through M5Unified/M5GFX (epdiy) |
+| Touch | GT911 capacitive, I²C |
+| RTC | on board, keeps time through power-off |
+| Power | internal LiPo or USB-C; GPIO44 is the power hold, set first at boot |
 
----
+## Software
 
-## Project Structure
+| Component | Version |
+|---|---|
+| PlatformIO platform | `espressif32`, Arduino framework, board `esp32-s3-devkitm-1` |
+| [M5Unified](https://github.com/m5stack/M5Unified) | ^0.2.5 |
+| [LVGL](https://lvgl.io/) | ^8.3.0 |
+| [PubSubClient](https://github.com/knolleary/pubsubclient) | ^2.8.0 |
+| [ArduinoJson](https://arduinojson.org/) | ^7.0.0 |
+
+## Repository layout
 
 ```
 src/
-├── main.cpp
-├── config.h              # All MQTT topics and pin definitions
-├── secrets.h             # Gitignored — credentials
-├── secrets.h.template    # Copy and fill in
-├── lv_conf.h             # LVGL config (PSRAM-backed allocator)
-├── display/
-│   ├── epd_driver.*      # epdiy full/fast refresh wrapper
-│   ├── nav.*             # Page navigation
-│   ├── styles.*          # Global LVGL styles
-│   ├── ui.*              # LVGL init, header, status bar
-│   └── pages/            # One subfolder per page
-├── fonts/                # MDI icon font for LVGL
-├── mqtt/                 # PubSubClient wrapper + topic dispatch
-├── ota/                  # Browser OTA server
-├── power/                # Battery ADC, light sleep
-├── time/                 # NTP sync via RTC
-└── touch/                # GT911 driver wrapper
+  main.cpp                 # boot, main loop, Wi-Fi reconnect, status updates
+  config.h                 # all MQTT topics, time zone, pins
+  secrets.h.template       # copy to secrets.h (gitignored)
+  lv_conf.h                # LVGL config (PSRAM allocator)
+  display/
+    epd_driver.*           # LVGL → e-paper flush, fast/quality refresh
+    nav.*  styles.*  ui.*  # page switching, styles, header
+    pages/<page>/          # one folder per page
+  fonts/                   # MDI icon fonts (20, 48 px, battery)
+  mqtt/ha_mqtt.*           # PubSubClient, topic dispatch, discovery
+  ota/ota.*                # browser OTA server
+  power/battery.* sleep.*  # battery via M5.Power, light sleep / power-off
+  time/rtc_sync.*          # RTC restore, NTP sync
+  touch/gt911.*            # touch → LVGL input
 ha/
-└── papers3dash.yaml      # Home Assistant package
+  papers3dash.yaml         # Home Assistant package
+ota_upload.sh              # build and upload over Wi-Fi
 ```
 
----
+## Development
+
+`main` holds released versions, `dev` is where work happens. Changes go to
+`dev`, get tested on a real PaperS3, and are merged to `main` with a release
+(`vX.Y.Z` tag, notes from [CHANGELOG.md](CHANGELOG.md)). Build without
+flashing:
+
+```bash
+pio run
+```
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[MIT](LICENSE).

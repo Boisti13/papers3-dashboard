@@ -2,13 +2,16 @@
 # PaperS3 Dashboard — Home Assistant package
 #
 # Place this file at:  config/packages/papers3dash.yaml
-# Reference in configuration.yaml:
+# and load the packages folder in configuration.yaml:
 #
 #   homeassistant:
-#     packages:
-#       papers3dash: !include packages/papers3dash.yaml
+#     packages: !include_dir_named packages
 #
-# Also add to configuration.yaml directly (packages don't support it):
+# This package handles the commands the PaperS3 publishes (climate, switches,
+# lights, remotes, vacuum) and pushes slow-changing values when it connects.
+# Its values come from mqtt_statestream — put that in its own package, e.g.
+# config/packages/mqtt_statestream.yaml (works as a package; only read at
+# Home Assistant start, so it needs a restart, not a reload):
 #
 #   mqtt_statestream:
 #     base_topic: homeassistant

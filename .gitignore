@@ -8,3 +8,4 @@ Old_m5paper/
 .DS_Store
 cmake-build-*/
 CMakeListsPrivate.txt
+.claude/settings.local.json
