@@ -21,6 +21,7 @@ Merged to `main` on 2026-05-22 (pull request #4) but not tagged yet; the next re
 
 ### Under the hood
 - **Home Assistant package in line with the live copy** (2026-10-16): all 17 automations have readable ids (`papers3_…`), aliases in the form *PaperS3 – What it does*, and descriptions. Their entity ids changed with the new names (e.g. `automation.papers3_switch_a_switch`). The live package was updated the same way: it got the missing *Push bedroom lights on connect* automation, and both push-on-connect automations now listen on `papers3dash/availability` instead of `paperdash/status` (the firmware sends both).
+- **Rendered pictures of every page** in the README (`docs/screenshots/`), made by `tools/render/`: it builds the real page code on a Linux PC against stubs for Wi-Fi, MQTT, OTA and sleep, fills in sample values and writes 540×960 PNGs in the panel's 16 grey levels — no device needed.
 - Documentation brought in line with the other projects: README rewritten (badges, highlights, install steps, entity tables, layout), this changelog, a `CLAUDE.md` with the working rules. The Home Assistant package's header comment no longer says `mqtt_statestream` must go into `configuration.yaml` — it works as a package.
 - `.claude/settings.local.json` (one PC's local Claude Code permissions) is no longer tracked.
 

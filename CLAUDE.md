@@ -16,6 +16,10 @@
   real device; flash over USB (`pio run --target upload`) or Wi-Fi
   (`./ota_upload.sh <ip>` after tapping OTA on the Settings page) only when
   the owner says so.
+- **Screenshots**: after a UI change, render `docs/screenshots/` again with
+  `tools/render/build.sh` (README → *Screenshots*) on the dev box — it needs
+  gcc/g++/zlib and LVGL v8.3.11 cloned outside the repo. New pages or
+  sub-pages go into `render.cpp` and the README's gallery.
 - **Home Assistant side**: the live files are `/config/packages/papers3dash.yaml`
   (commands, push on connect) and `/config/packages/mqtt_statestream.yaml`
   (the entities mirrored to MQTT for the
