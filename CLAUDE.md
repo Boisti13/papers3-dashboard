@@ -5,8 +5,7 @@
   the owner asks ("merge to main and make a new release"): merge `dev` into
   `main`, tag `vX.Y.Z`, GitHub release with the CHANGELOG section as notes.
   (Pull request #4 was squash-merged into `main` on 2026-05-22 without a tag;
-  `dev` was fast-forwarded to it on 2026-10-16. Its changes sit under
-  *Unreleased* and become v1.4.0.)
+  its changes were released as v1.4.0 on 2026-10-29.)
 - Every user-visible change: an entry under *Unreleased* in `CHANGELOG.md`
   (Added / Changed / Fixed / Under the hood) and the README updated to match
   (Highlights, Pages, entity tables).

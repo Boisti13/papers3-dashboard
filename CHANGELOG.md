@@ -2,9 +2,9 @@
 
 All notable changes, newest first. Versions follow [semantic versioning](https://semver.org/); each release is tagged `vX.Y.Z` on `main`.
 
-## Unreleased
+## v1.4.0 — 2026-10-29
 
-Merged to `main` on 2026-05-22 (pull request #4) but not tagged yet; the next release will be v1.4.0.
+The firmware changes were merged to `main` on 2026-05-22 (pull request #4); this release tags them together with the documentation work since.
 
 ### Added
 - **Battery icon in the header** (Material Design Icons): level in steps, charging, and *USB, full*.
